@@ -1,13 +1,10 @@
-// app/api/trigger-workflow/route.ts
+import { NextRequest, NextResponse } from "next/server";
 
-// Server-side route that forwards workflow data to the public n8n webhook, removing CORS issues for the client.
-
-export async function POST(req: Request) {
+export async function POST(req: NextRequest) {
   try {
-    // Parse the JSON payload coming from the frontend
     const body = await req.json();
+    console.log("Webhook payload:", body);
 
-    // Forward the payload to the n8n webhook
     const res = await fetch(
       "https://n8n.ximus.io/webhook-test/n8n-developer-trigger",
       {
@@ -17,11 +14,10 @@ export async function POST(req: Request) {
       }
     );
 
-    // Relay the response from n8n back to the caller
     const text = await res.text();
-    return new Response(text, { status: res.status });
+    return new NextResponse(text, { status: res.status });
   } catch (err) {
     console.error("Workflow Trigger Error:", err);
-    return new Response("Internal Server Error", { status: 500 });
+    return new NextResponse("Internal Server Error", { status: 500 });
   }
-} 
+}
