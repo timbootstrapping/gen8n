@@ -82,35 +82,49 @@ export default function Dashboard() {
     setSubmitting(true);
     setFormMsg("");
 
+    let workflowId: string | null = null;
+
     try {
-      // send webhook
-      await fetch('/api/workflow-webhook', {
+      // 1. Insert placeholder row and capture the new workflow ID
+      const { data: insertData, error: insertError } = await supabase
+        .from("workflows")
+        .insert({
+          user_id: user.id,
+          name,
+          description,
+          json: {},
+          sticky_notes: {},
+          status: "pending",
+        })
+        .select("id")
+        .single();
+
+      if (insertError || !insertData) throw insertError || new Error("Insert failed");
+
+      workflowId = insertData.id;
+
+      // 2. Trigger the workflow generation webhook via our API
+      const triggerRes = await fetch("/api/trigger-workflow", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          email: user.email,
-          plan,
+          workflow_id: workflowId,
           name,
           description,
           nodes,
-          baseUrl,
+          base_url: baseUrl,
+          user_id: user.id,
+          email: user.email,
           api_keys: {
-            openrouter: process.env.OPENROUTER_API_KEY || '',
-            anthropic: process.env.ANTHROPIC_API_KEY || '',
+            openrouter: (user.user_metadata as any)?.openrouter_key ?? process.env.OPENROUTER_API_KEY ?? null,
+            anthropic: (user.user_metadata as any)?.anthropic_key ?? process.env.ANTHROPIC_API_KEY ?? null,
           },
         }),
       });
 
-      // store placeholder workflow row (pending)
-      await supabase.from("workflows").insert({
-        user_id: user.id,
-        name,
-        description,
-        json: {},
-        sticky_notes: {},
-        status: "pending",
-      });
+      if (!triggerRes.ok) throw new Error("Webhook trigger failed");
 
+      // 3. Success UI updates
       setFormMsg("Workflow request sent! It will appear in your list soon.");
       setName("");
       setDescription("");
@@ -120,6 +134,11 @@ export default function Dashboard() {
       setTotalWorkflows((prev) => prev + 1);
       setUsage((prev) => prev + 1);
     } catch (err) {
+      console.error(err);
+      // rollback placeholder if created
+      if (workflowId) {
+        await supabase.from("workflows").delete().eq("id", workflowId);
+      }
       setFormMsg("Error sending request. Please try again.");
     } finally {
       setSubmitting(false);

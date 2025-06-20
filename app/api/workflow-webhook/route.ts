@@ -2,8 +2,12 @@ import { supabaseAdmin } from '@/lib/supabaseAdmin';
 
 export async function POST(req: Request) {
   try {
-    const body = await req.json();
-    const { workflow_id, json, sticky_notes, status } = body;
+    const { workflow_id, json, sticky_notes, status } = await req.json();
+
+    if (!workflow_id) {
+      console.error('Missing workflow_id');
+      return new Response('Missing workflow_id', { status: 400 });
+    }
 
     const { error } = await supabaseAdmin
       .from('workflows')
