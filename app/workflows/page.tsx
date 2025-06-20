@@ -87,7 +87,7 @@ export default function WorkflowsPage() {
   if (loading) return <p className="text-center mt-10">Loading...</p>;
 
   return (
-    <div className="space-y-8 py-10">
+    <div className="max-w-[1200px] mx-auto px-4 sm:px-8 py-6 space-y-8">
       <h1 className="text-3xl font-bold">Your Workflows</h1>
 
       {/* search */}
@@ -96,18 +96,18 @@ export default function WorkflowsPage() {
         placeholder="Search workflows..."
         value={search}
         onChange={(e) => setSearch(e.target.value)}
-        className="w-full max-w-xl bg-[#1a1a1d] text-white p-2 rounded-xl border border-border focus:ring-2 focus:ring-highlight outline-none"
+        className="w-full max-w-xl bg-[#1a1a1d] text-white p-2 rounded-xl border border-border focus:ring-2 focus:ring-highlight outline-none input-hover"
       />
 
       {filtered.length === 0 ? (
         <div className="flex flex-col items-center gap-4 py-20">
-          <Zap size={40} strokeWidth={1} className="text-highlight drop-shadow-[0_0_6px_#5d5aff]" />
+          <Zap size={40} strokeWidth={1} className="text-highlight drop-shadow-[0_0_6px_#5d5aff] icon-hover" />
           <p>No workflows found</p>
         </div>
       ) : (
         <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
           {filtered.map((wf) => (
-            <div key={wf.id} className="bg-surface rounded-2xl p-4 border border-border">
+            <div key={wf.id} className="bg-surface rounded-2xl p-4 border border-border card-hover">
               <div className="flex justify-between items-center mb-2">
                 <h2 className="text-lg font-semibold truncate" title={wf.name}>{wf.name}</h2>
                 <span className="text-xs text-neutral-400">{formatDate(wf.created_at)}</span>
@@ -117,10 +117,10 @@ export default function WorkflowsPage() {
                 <p className="text-xs text-yellow-400">Status: {wf.status}</p>
               )}
               <div className="flex gap-2 flex-wrap mt-2">
-                <Button size="sm" onClick={() => openModal(wf)}>View</Button>
-                <Button intent="secondary" size="sm" onClick={() => downloadJSON(wf)}>Download</Button>
-                <Button intent="secondary" size="sm" onClick={() => copyJSON(wf)}>Copy</Button>
-                <Button intent="secondary" size="sm" className="text-red-500" onClick={() => confirmDelete(wf.id)}>Delete</Button>
+                <Button size="sm" onClick={() => openModal(wf)} className="action-hover">View</Button>
+                <Button intent="secondary" size="sm" onClick={() => downloadJSON(wf)} className="action-hover">Download</Button>
+                <Button intent="secondary" size="sm" onClick={() => copyJSON(wf)} className="action-hover">Copy</Button>
+                <Button intent="secondary" size="sm" className="danger-hover" onClick={() => confirmDelete(wf.id)}>Delete</Button>
               </div>
             </div>
           ))}
@@ -130,7 +130,7 @@ export default function WorkflowsPage() {
       {/* show more */}
       {filtered.length >= range[1] + 1 && (
         <div className="text-center">
-          <Button onClick={handleShowMore}>Show More</Button>
+          <Button onClick={handleShowMore} className="hover-unified">Show More</Button>
         </div>
       )}
 
@@ -150,7 +150,7 @@ export default function WorkflowsPage() {
                 </div>
               ))}
             </div>
-            <Button intent="secondary" onClick={() => setShowModal(false)}>Close</Button>
+            <Button intent="secondary" onClick={() => setShowModal(false)} className="hover-unified">Close</Button>
           </div>
         </div>
       )}

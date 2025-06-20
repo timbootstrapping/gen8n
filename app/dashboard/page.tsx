@@ -154,7 +154,7 @@ export default function Dashboard() {
   }
 
   return (
-    <div className="py-24 space-y-14">
+    <div className="max-w-[1200px] mx-auto px-4 sm:px-8 py-6 space-y-14">
       {/* Header */}
       <div className="flex justify-between items-start flex-col md:flex-row md:items-center gap-4">
         <div>
@@ -184,7 +184,7 @@ export default function Dashboard() {
             value={name}
             onChange={(e) => setName(e.target.value)}
             placeholder="Workflow Name"
-            className="bg-transparent border border-border rounded-2xl px-4 py-2 focus:border-highlight outline-none transition-colors"
+            className="bg-transparent border border-border rounded-2xl px-4 py-2 focus:border-highlight outline-none input-hover"
           />
           <textarea
             required
@@ -192,27 +192,27 @@ export default function Dashboard() {
             value={description}
             onChange={(e) => setDescription(e.target.value)}
             placeholder="Description"
-            className="bg-transparent border border-border rounded-2xl px-4 py-2 focus:border-highlight outline-none transition-colors"
+            className="bg-transparent border border-border rounded-2xl px-4 py-2 focus:border-highlight outline-none input-hover resize-none"
           />
           <input
             type="text"
             value={nodes}
             onChange={(e) => setNodes(e.target.value)}
             placeholder="Suggested nodes/services (optional)"
-            className="bg-transparent border border-border rounded-2xl px-4 py-2 focus:border-highlight outline-none transition-colors"
+            className="bg-transparent border border-border rounded-2xl px-4 py-2 focus:border-highlight outline-none input-hover"
           />
           <input
             type="url"
             value={baseUrl}
             onChange={(e) => setBaseUrl(e.target.value)}
             placeholder="n8n Base URL"
-            className="bg-transparent border border-border rounded-2xl px-4 py-2 focus:border-highlight outline-none transition-colors"
+            className="bg-transparent border border-border rounded-2xl px-4 py-2 focus:border-highlight outline-none input-hover"
           />
           {formMsg && <p className="text-sm text-highlight">{formMsg}</p>}
           <Button
             type="submit"
             intent="primary"
-            className="w-full"
+            className="w-full hover-unified"
             disabled={submitting}
           >
             {submitting ? "Generating..." : "Generate Workflow"}
@@ -220,19 +220,19 @@ export default function Dashboard() {
         </form>
 
         {/* View workflows card */}
-        <div className="bg-surface border border-border rounded-2xl p-6 flex flex-col justify-between gap-6">
+        <div className="bg-surface border border-border rounded-2xl p-6 flex flex-col justify-between gap-6 card-hover">
           <div className="flex items-center gap-3">
             <List
               size={28}
               strokeWidth={1}
-              className="text-highlight drop-shadow-[0_0_6px_#5d5aff]"
+              className="text-highlight drop-shadow-[0_0_6px_#5d5aff] icon-hover"
             />
             <h2 className="text-2xl font-semibold">View All Workflows</h2>
           </div>
           <p className="text-gray-400">
             Manage and download your existing workflows
           </p>
-          <Button intent="secondary" rounded="full" size="lg" onClick={() => (window.location.href = "/workflows")}
+          <Button intent="secondary" rounded="full" size="lg" onClick={() => (window.location.href = "/workflows")} className="hover-unified"
           >
             View All Workflows
           </Button>
@@ -248,10 +248,10 @@ export default function Dashboard() {
             <Zap
               size={40}
               strokeWidth={1}
-              className="text-highlight drop-shadow-[0_0_6px_#5d5aff]"
+              className="text-highlight drop-shadow-[0_0_6px_#5d5aff] icon-hover"
             />
             <p>No workflows yet</p>
-            <Button onClick={() => document.querySelector("form")?.scrollIntoView({ behavior: "smooth" })}>
+            <Button onClick={() => document.querySelector("form")?.scrollIntoView({ behavior: "smooth" })} className="hover-unified">
               Generate First Workflow
             </Button>
           </div>
@@ -260,7 +260,7 @@ export default function Dashboard() {
             {recentWorkflows.map((wf) => (
               <div
                 key={wf.id}
-                className="bg-surface border border-border rounded-2xl p-4 flex flex-col gap-2 hover:bg-[#1a1a1a] transition-colors"
+                className="bg-surface border border-border rounded-2xl p-4 flex flex-col gap-2 card-hover"
               >
                 <h3 className="font-medium text-lg truncate" title={wf.name}>{wf.name}</h3>
                 <p className="text-sm text-gray-400 capitalize">Status: {wf.status}</p>
@@ -276,6 +276,7 @@ export default function Dashboard() {
                     intent="secondary"
                     size="sm"
                     onClick={() => alert(JSON.stringify(wf.json, null, 2))}
+                    className="action-hover"
                   >
                     Expand
                   </Button>
@@ -293,6 +294,7 @@ export default function Dashboard() {
                       a.click();
                       URL.revokeObjectURL(url);
                     }}
+                    className="action-hover"
                   >
                     Download
                   </Button>
@@ -309,6 +311,7 @@ export default function Dashboard() {
                         setTotalWorkflows((prev) => prev - 1);
                       }
                     }}
+                    className="danger-hover"
                   >
                     Delete
                   </Button>
@@ -336,11 +339,11 @@ function StatCard({
   Icon: IconType;
 }) {
   return (
-    <div className="flex items-center gap-4 bg-surface border border-border rounded-2xl p-4 hover:bg-[#1a1a1a] transition-colors group">
+    <div className="flex items-center gap-4 bg-surface border border-border rounded-2xl p-4 card-hover group">
       <Icon
         size={32}
         strokeWidth={1}
-        className="text-highlight group-hover:drop-shadow-[0_0_6px_#5d5aff] transition"
+        className="text-highlight group-hover:drop-shadow-[0_0_6px_#5d5aff] transition icon-hover"
       />
       <div>
         <p className="text-sm text-gray-400">{title}</p>

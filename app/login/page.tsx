@@ -34,7 +34,7 @@ export default function LoginPage() {
   };
 
   return (
-    <div className="max-w-md mx-auto px-4 py-20 space-y-6">
+    <div className="max-w-md mx-auto px-4 py-20 pt-24 space-y-6">
       <h1 className="text-3xl font-bold text-center">Sign In</h1>
       <form onSubmit={handleLogin} className="space-y-4">
         <input

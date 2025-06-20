@@ -1,29 +1,44 @@
-import Link from 'next/link';
-import { Bell } from 'lucide-react';
-import dynamic from 'next/dynamic';
+'use client';
 
-const AccountDropdown = dynamic(() => import('@/components/layout/AccountDropdown'), { ssr: false });
+import { usePathname } from 'next/navigation';
+import LandingHeader from './LandingHeader';
+import DashboardHeader from './DashboardHeader';
+
+// Define routes that should use the landing header
+const publicRoutes = [
+  '/',
+  '/login',
+  '/signup',
+  '/pricing',
+  '/features'
+];
+
+// Define routes that should use the dashboard header
+const authenticatedRoutes = [
+  '/dashboard',
+  '/workflows',
+  '/generate',
+  '/settings',
+  '/feedback',
+  '/admin'
+];
 
 export default function Header() {
-  return (
-    <header className="w-full bg-surface border-b border-border">
-      <div className="max-w-[1200px] mx-auto px-4 sm:px-8 flex items-center justify-between py-4">
-        <Link href="/" className="text-xl font-bold text-highlight">
-          Gen8n
-        </Link>
-        <nav className="flex items-center gap-6 text-sm">
-          <Link href="/dashboard" className="hover:text-highlight transition-colors">
-            Dashboard
-          </Link>
-          <Link href="/workflows" className="hover:text-highlight transition-colors">
-            Workflows
-          </Link>
-          <button aria-label="Notifications" className="hover:text-highlight transition-colors">
-            <Bell size={20} strokeWidth={1} />
-          </button>
-          <AccountDropdown />
-        </nav>
-      </div>
-    </header>
+  const pathname = usePathname();
+
+  // Check if current route is an authenticated route
+  const isDashboardRoute = authenticatedRoutes.some(route => 
+    pathname.startsWith(route)
   );
+
+  // Check if current route is explicitly a public route
+  const isPublicRoute = publicRoutes.includes(pathname);
+
+  // Default to landing header for public routes, dashboard header for authenticated routes
+  if (isDashboardRoute) {
+    return <DashboardHeader />;
+  }
+
+  // Default to landing header for public routes and any unmatched routes
+  return <LandingHeader />;
 } 

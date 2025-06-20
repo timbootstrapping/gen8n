@@ -19,18 +19,20 @@ const faqs = [
 
 export default function FAQ() {
   return (
-    <section id="faq" className="py-10 px-4 sm:px-8 lg:px-20 space-y-12">
-      <h2 className="text-center text-3xl font-semibold">FAQ</h2>
-      <div className="space-y-4 max-w-3xl mx-auto">
-        {faqs.map(({ q, a }) => (
-          <details key={q} className="border border-border rounded-2xl p-4">
-            <summary className="cursor-pointer list-none flex justify-between items-center">
-              <span>{q}</span>
-              <span className="text-highlight">+</span>
-            </summary>
-            <p className="mt-2 text-gray-400 text-sm leading-relaxed">{a}</p>
-          </details>
-        ))}
+    <section id="faq" className="py-16">
+      <div className="max-w-[1200px] mx-auto px-4 sm:px-8 space-y-12">
+        <h2 className="text-center text-3xl font-semibold">FAQ</h2>
+        <div className="space-y-4 max-w-3xl mx-auto">
+          {faqs.map(({ q, a }) => (
+            <details key={q} className="border border-border rounded-2xl p-4 card-hover">
+              <summary className="cursor-pointer list-none flex justify-between items-center">
+                <span>{q}</span>
+                <span className="text-highlight icon-hover">+</span>
+              </summary>
+              <p className="mt-2 text-gray-400 text-sm leading-relaxed">{a}</p>
+            </details>
+          ))}
+        </div>
       </div>
     </section>
   );

@@ -60,7 +60,7 @@ export default function SettingsPage() {
   }
 
   return (
-    <div className="space-y-8 py-10">
+    <div className="max-w-[1200px] mx-auto px-4 sm:px-8 py-6 space-y-8">
       <h1 className="text-3xl font-bold">Settings</h1>
 
       {/* Profile */}
@@ -78,17 +78,17 @@ export default function SettingsPage() {
           placeholder="New Password"
           value={newPassword}
           onChange={(e) => setNewPassword(e.target.value)}
-          className="w-full bg-[#1a1a1d] border border-border rounded-xl px-3 py-2"
+          className="w-full bg-[#1a1a1d] border border-border rounded-xl px-3 py-2 input-hover"
         />
         <input
           type="password"
           placeholder="Confirm Password"
           value={confirmPassword}
           onChange={(e) => setConfirmPassword(e.target.value)}
-          className="w-full bg-[#1a1a1d] border border-border rounded-xl px-3 py-2"
+          className="w-full bg-[#1a1a1d] border border-border rounded-xl px-3 py-2 input-hover"
         />
         {pwMsg && <p className="text-sm text-highlight">{pwMsg}</p>}
-        <Button onClick={handlePasswordChange}>Update Password</Button>
+        <Button onClick={handlePasswordChange} className="hover-unified">Update Password</Button>
       </section>
 
       {/* API keys */}
@@ -99,17 +99,17 @@ export default function SettingsPage() {
           placeholder="OpenRouter Key"
           value={openrouterKey}
           onChange={(e) => setOpenrouterKey(e.target.value)}
-          className="w-full bg-[#1a1a1d] border border-border rounded-xl px-3 py-2"
+          className="w-full bg-[#1a1a1d] border border-border rounded-xl px-3 py-2 input-hover"
         />
         <input
           type="text"
           placeholder="Claude/Anthropic Key"
           value={anthropicKey}
           onChange={(e) => setAnthropicKey(e.target.value)}
-          className="w-full bg-[#1a1a1d] border border-border rounded-xl px-3 py-2"
+          className="w-full bg-[#1a1a1d] border border-border rounded-xl px-3 py-2 input-hover"
         />
         {apiMsg && <p className="text-sm text-highlight">{apiMsg}</p>}
-        <Button onClick={handleSaveKeys}>Save Keys</Button>
+        <Button onClick={handleSaveKeys} className="hover-unified">Save Keys</Button>
       </section>
 
       {/* Plan & usage */}
@@ -117,7 +117,7 @@ export default function SettingsPage() {
         <h2 className="text-lg font-semibold">Plan & Usage</h2>
         <p>Plan: {plan}</p>
         <p>Workflows this month: {usage}</p>
-        <Button intent="secondary" onClick={() => (window.location.href = '/#pricing')}>
+        <Button intent="secondary" onClick={() => (window.location.href = '/#pricing')} className="hover-unified">
           Change Plan
         </Button>
       </section>

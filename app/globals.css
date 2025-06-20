@@ -5,4 +5,359 @@
 html,
 body {
   @apply bg-background text-foreground;
+}
+
+/* Starfield animations */
+@keyframes animStar {
+  from {
+    transform: translateY(0px);
+  }
+  to {
+    transform: translateY(-2000px);
+  }
+}
+
+.animate-star-slow {
+  animation: animStar 100s linear infinite;
+}
+
+.animate-star-medium {
+  animation: animStar 50s linear infinite;
+}
+
+.animate-star-fast {
+  animation: animStar 25s linear infinite;
+}
+
+/* Hero section specific starfield positioning */
+.hero-starfield {
+  position: absolute;
+  inset: 0;
+  pointer-events: auto; /* Allow mouse events for parallax */
+}
+
+/* =================================
+   GLOBAL UNIFIED HOVER SYSTEM
+   ================================= */
+
+/* Base hover class for all interactive elements */
+.hover-unified {
+  transition: all 0.2s ease-in-out;
+  cursor: pointer;
+}
+
+.hover-unified:hover {
+  transform: scale(1.03);
+  box-shadow: 0 0 10px rgba(162, 89, 255, 0.4);
+}
+
+.hover-unified:active {
+  transform: scale(0.98);
+  box-shadow: 0 0 5px rgba(162, 89, 255, 0.3);
+}
+
+/* Card hover effects */
+.card-hover {
+  transition: all 0.2s ease-in-out;
+  cursor: pointer;
+}
+
+.card-hover:hover {
+  transform: translateY(-2px) scale(1.02);
+  box-shadow: 
+    0 0 15px rgba(162, 89, 255, 0.3),
+    0 8px 25px rgba(0, 0, 0, 0.15);
+}
+
+.card-hover:active {
+  transform: translateY(-1px) scale(1.01);
+  box-shadow: 
+    0 0 8px rgba(162, 89, 255, 0.2),
+    0 4px 15px rgba(0, 0, 0, 0.1);
+}
+
+/* Icons glow when their parent is hovered */
+.card-hover:hover .icon-hover,
+.hover-unified:hover .icon-hover {
+  filter: drop-shadow(0 0 8px rgba(162, 89, 255, 0.6));
+  transform: scale(1.1);
+}
+
+/* Individual Icon hover effects */
+.icon-hover {
+  transition: all 0.2s ease-in-out;
+  cursor: pointer;
+}
+
+.icon-hover:hover {
+  filter: drop-shadow(0 0 8px rgba(162, 89, 255, 0.5));
+  transform: scale(1.1);
+}
+
+/* Navigation and link hover effects */
+.nav-hover {
+  transition: all 0.2s ease-in-out;
+  cursor: pointer;
+}
+
+.nav-hover:hover {
+  color: #a259ff;
+  filter: drop-shadow(0 0 6px rgba(162, 89, 255, 0.4));
+  transform: scale(1.05);
+}
+
+/* Form element hover effects */
+.input-hover {
+  transition: all 0.2s ease-in-out;
+}
+
+.input-hover:hover {
+  border-color: rgba(162, 89, 255, 0.5);
+  box-shadow: 0 0 8px rgba(162, 89, 255, 0.2);
+}
+
+.input-hover:focus {
+  border-color: #a259ff;
+  box-shadow: 0 0 12px rgba(162, 89, 255, 0.4);
+}
+
+/* Toggle and control hover effects */
+.toggle-hover {
+  transition: all 0.2s ease-in-out;
+  cursor: pointer;
+}
+
+.toggle-hover:hover {
+  box-shadow: 0 0 8px rgba(162, 89, 255, 0.3);
+  transform: scale(1.05);
+}
+
+/* Dashboard action hover effects */
+.action-hover {
+  transition: all 0.2s ease-in-out;
+  cursor: pointer;
+}
+
+.action-hover:hover {
+  transform: scale(1.05);
+  box-shadow: 0 0 10px rgba(162, 89, 255, 0.3);
+}
+
+.action-hover:active {
+  transform: scale(1.02);
+  box-shadow: 0 0 6px rgba(162, 89, 255, 0.2);
+}
+
+/* Danger/delete action hover effects */
+.danger-hover {
+  transition: all 0.2s ease-in-out;
+  cursor: pointer;
+}
+
+.danger-hover:hover {
+  transform: scale(1.05);
+  box-shadow: 0 0 10px rgba(239, 68, 68, 0.4);
+  color: #ef4444;
+}
+
+.danger-hover:active {
+  transform: scale(1.02);
+  box-shadow: 0 0 6px rgba(239, 68, 68, 0.3);
+}
+
+/* =================================
+   HERO SPECIFIC STYLES
+   ================================= */
+
+/* Updated Hero Button Styles */
+.hero-primary-button {
+  background: #7c3aed !important;
+  border: 1px solid rgba(124, 58, 237, 0.3) !important;
+  color: white !important;
+  font-weight: 600 !important;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2) !important;
+  transition: all 0.3s ease !important;
+}
+
+.hero-primary-button:hover {
+  background: j
+   !important;
+  box-shadow: 
+    0 0 20px rgba(124, 58, 237, 0.4),
+    0 6px 25px rgba(0, 0, 0, 0.3) !important;
+  transform: translateY(-2px) !important;
+}
+
+.hero-secondary-button {
+  backdrop-filter: blur(12px) !important;
+  background: rgba(255, 255, 255, 0.08) !important;
+  border: 1px solid rgba(255, 255, 255, 0.2) !important;
+  color: white !important;
+  transition: all 0.3s ease !important;
+}
+
+.hero-secondary-button:hover {
+  background: rgba(255, 255, 255, 0.15) !important;
+  box-shadow: 0 0 16px rgba(124, 58, 237, 0.3) !important;
+  border-color: rgba(124, 58, 237, 0.5) !important;
+  transform: translateY(-2px) !important;
+}
+
+/* Mouse Scroll Indicator */
+.mouse-scroll-indicator {
+  display: flex;
+  justify-content: center;
+  margin-top: 2rem;
+  cursor: pointer;
+  animation: float 3s ease-in-out infinite;
+}
+
+.mouse {
+  width: 24px;
+  height: 40px;
+  border: 2px solid rgba(255, 255, 255, 0.4);
+  border-radius: 14px;
+  position: relative;
+  opacity: 0.7;
+  transition: all 0.3s ease;
+  box-shadow: 
+    0 0 10px rgba(124, 58, 237, 0.2),
+    inset 0 0 10px rgba(255, 255, 255, 0.1);
+}
+
+.mouse:hover {
+  opacity: 1;
+  border-color: rgba(124, 58, 237, 0.6);
+  box-shadow: 
+    0 0 20px rgba(124, 58, 237, 0.4),
+    inset 0 0 15px rgba(255, 255, 255, 0.2);
+  transform: scale(1.05);
+}
+
+.dot {
+  width: 6px;
+  height: 6px;
+  background: rgba(255, 255, 255, 0.9);
+  border-radius: 50%;
+  position: absolute;
+  top: 8px;
+  left: 50%;
+  transform: translateX(-50%);
+  animation: scroll-bounce 1.4s infinite ease-in-out;
+  box-shadow: 0 0 20px rgba(124, 58, 237, 0.5);
+}
+
+@keyframes scroll-bounce {
+  0%, 100% {
+    transform: translate(-50%, 0);
+    opacity: 1;
+  }
+  50% {
+    transform: translate(-50%, 16px);
+    opacity: 0.3;
+  }
+}
+
+@keyframes float {
+  0%, 100% { 
+    transform: translateY(0); 
+  }
+  50% { 
+    transform: translateY(4px); 
+  }
+}
+
+/* Global layout constraints */
+.page-container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 1rem;
+}
+
+/* Hero radial blur overlay - applies to entire hero section */
+.hero-section::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(
+    circle at center, 
+    transparent 0%, 
+    transparent 30%, 
+    rgba(0, 0, 0, 0.1) 50%, 
+    rgba(0, 0, 0, 0.3) 70%, 
+    rgba(0, 0, 0, 0.6) 85%, 
+    rgba(0, 0, 0, 0.8) 100%
+  );
+  backdrop-filter: blur(0px);
+  -webkit-backdrop-filter: blur(0px);
+  pointer-events: none;
+  z-index: 5;
+}
+
+/* Progressive blur using multiple pseudo-elements for better effect */
+.hero-section {
+  position: relative;
+}
+
+.hero-section::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(
+    circle at center,
+    transparent 60%,
+    rgba(0, 0, 0, 0.8) 100%
+  );
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  pointer-events: none;
+  z-index: 5;
+  mask: radial-gradient(
+    circle at center,
+    transparent 0%,
+    transparent 60%,
+    black 100%
+  );
+  -webkit-mask: radial-gradient(
+    circle at center,
+    transparent 0%,
+    transparent 60%,
+    black 100%
+  );
+}
+
+/* Hero wrapper - no overlay, just positioning */
+.hero-wrapper {
+  position: relative;
+  z-index: 10;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+  .mouse-scroll-indicator {
+    margin-top: 1.5rem;
+  }
+  
+  .mouse {
+    width: 20px;
+    height: 36px;
+    border-radius: 12px;
+  }
+  
+  .dot {
+    width: 5px;
+    height: 5px;
+    top: 6px;
+  }
+  
+  @keyframes scroll-bounce {
+    0%, 100% {
+      transform: translate(-50%, 0);
+      opacity: 1;
+    }
+    50% {
+      transform: translate(-50%, 14px);
+      opacity: 0.3;
+    }
+  }
 } 

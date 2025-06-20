@@ -13,14 +13,16 @@ const CtaBanner = dynamic(() => import('@/components/sections/CtaBanner'));
 export default function HomePage() {
   return (
     <>
-      <main className="flex flex-col gap-16">
+      <main className="flex flex-col">
         <Hero />
-        <HowItWorks />
-        <Features />
-        <Testimonials />
-        <Pricing />
-        <FAQ />
-        <CtaBanner />
+        <div className="space-y-16 py-16">
+          <HowItWorks />
+          <Features />
+          <Testimonials />
+          <Pricing />
+          <FAQ />
+          <CtaBanner />
+        </div>
       </main>
       <Footer />
     </>

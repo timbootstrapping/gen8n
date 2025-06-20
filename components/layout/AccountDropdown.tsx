@@ -31,7 +31,7 @@ export default function AccountDropdown() {
     <div className="relative" ref={ref}>
       <button
         onClick={() => setOpen((o) => !o)}
-        className="hover:text-highlight transition-colors"
+        className="hover:text-highlight transition-colors icon-hover"
         aria-label="Account menu"
       >
         <User size={20} strokeWidth={1} />
@@ -47,23 +47,23 @@ export default function AccountDropdown() {
           >
             <Link
               href="/dashboard"
-              className="flex items-center gap-2 p-3 hover:bg-[#1f1f1f] transition-colors"
+              className="flex items-center gap-2 p-3 hover:bg-[#1f1f1f] transition-colors nav-hover"
               onClick={() => setOpen(false)}
             >
-              <LayoutDashboard size={16} strokeWidth={1} /> Dashboard
+              <LayoutDashboard size={16} strokeWidth={1} className="icon-hover" /> Dashboard
             </Link>
             <Link
               href="/settings"
-              className="flex items-center gap-2 p-3 hover:bg-[#1f1f1f] transition-colors"
+              className="flex items-center gap-2 p-3 hover:bg-[#1f1f1f] transition-colors nav-hover"
               onClick={() => setOpen(false)}
             >
-              <Settings size={16} strokeWidth={1} /> Settings
+              <Settings size={16} strokeWidth={1} className="icon-hover" /> Settings
             </Link>
             <button
               onClick={handleSignOut}
-              className="flex items-center gap-2 p-3 w-full text-left text-red-500 hover:bg-[#1f1f1f] transition-colors"
+              className="flex items-center gap-2 p-3 w-full text-left text-red-500 hover:bg-[#1f1f1f] transition-colors danger-hover"
             >
-              <LogOut size={16} strokeWidth={1} /> Sign Out
+              <LogOut size={16} strokeWidth={1} className="icon-hover" /> Sign Out
             </button>
           </motion.div>
         )}

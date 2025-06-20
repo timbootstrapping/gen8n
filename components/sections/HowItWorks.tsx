@@ -20,16 +20,18 @@ const steps = [
 
 export default function HowItWorks() {
   return (
-    <section id="how" className="py-10 px-4 sm:px-8 lg:px-20 space-y-12">
-      <h2 className="text-center text-3xl font-semibold">How It Works</h2>
-      <div className="grid md:grid-cols-3 gap-10">
-        {steps.map(({ title, description, icon: Icon }, idx) => (
-          <div key={idx} className="flex flex-col items-center text-center gap-4 p-6 border border-border rounded-2xl">
-            <Icon size={36} strokeWidth={1} className="text-highlight" />
-            <h3 className="text-xl font-medium">{title}</h3>
-            <p className="text-gray-400 leading-relaxed text-sm">{description}</p>
-          </div>
-        ))}
+    <section id="how-it-works" className="py-16">
+      <div className="max-w-[1200px] mx-auto px-4 sm:px-8 space-y-12">
+        <h2 className="text-center text-3xl font-semibold">How It Works</h2>
+        <div className="grid md:grid-cols-3 gap-10">
+          {steps.map(({ title, description, icon: Icon }, idx) => (
+            <div key={idx} className="flex flex-col items-center text-center gap-4 p-6 border border-border rounded-2xl card-hover">
+              <Icon size={36} strokeWidth={1} className="text-highlight icon-hover" />
+              <h3 className="text-xl font-medium">{title}</h3>
+              <p className="text-gray-400 leading-relaxed text-sm">{description}</p>
+            </div>
+          ))}
+        </div>
       </div>
     </section>
   );
