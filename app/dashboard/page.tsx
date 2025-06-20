@@ -84,7 +84,7 @@ export default function Dashboard() {
 
     try {
       // send webhook
-      await fetch("https://n8n.ximus.io/webhook/n8n-developer-trigger", {
+      await fetch('/api/workflow-webhook', {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -94,6 +94,10 @@ export default function Dashboard() {
           description,
           nodes,
           baseUrl,
+          api_keys: {
+            openrouter: process.env.OPENROUTER_API_KEY || '',
+            anthropic: process.env.ANTHROPIC_API_KEY || '',
+          },
         }),
       });
 
