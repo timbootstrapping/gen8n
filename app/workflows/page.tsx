@@ -6,7 +6,7 @@ import { supabase } from '@/lib/supabaseClient';
 import { formatDate } from '@/utils/formatDate';
 import { truncate } from '@/utils/truncate';
 import { Button } from '@/components/ui/Button';
-import { Zap } from 'lucide-react';
+import { Zap, Clipboard, Download, Trash2, X } from 'lucide-react';
 
 interface WorkflowRow {
   id: string;
@@ -63,7 +63,8 @@ export default function WorkflowsPage() {
   };
 
   const downloadJSON = (wf: WorkflowRow) => {
-    const blob = new Blob([JSON.stringify(wf.json, null, 2)], { type: 'application/json' });
+    const jsonData = typeof wf.json === "string" ? JSON.parse(wf.json) : wf.json;
+    const blob = new Blob([JSON.stringify(jsonData, null, 2)], { type: 'application/json' });
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
     a.href = url;
@@ -73,7 +74,8 @@ export default function WorkflowsPage() {
   };
 
   const copyJSON = (wf: WorkflowRow) => {
-    navigator.clipboard.writeText(JSON.stringify(wf.json, null, 2));
+    const jsonData = typeof wf.json === "string" ? JSON.parse(wf.json) : wf.json;
+    navigator.clipboard.writeText(JSON.stringify(jsonData, null, 2));
     alert('Copied to clipboard');
   };
 
@@ -82,6 +84,12 @@ export default function WorkflowsPage() {
       await supabase.from('workflows').delete().eq('id', id);
       setWorkflows((prev) => prev.filter((w) => w.id !== id));
     }
+  };
+
+  const handleModalDelete = async (id: string) => {
+    await confirmDelete(id);
+    setShowModal(false);
+    setActiveWf(null);
   };
 
   if (loading) return <p className="text-center mt-10">Loading...</p>;
@@ -137,11 +145,45 @@ export default function WorkflowsPage() {
       {/* modal */}
       {showModal && activeWf && (
         <div className="fixed inset-0 bg-black/60 flex items-center justify-center z-50">
-          <div className="bg-surface border border-border rounded-2xl p-6 max-w-2xl w-full max-h-[90vh] overflow-y-auto space-y-4">
-            <h2 className="text-xl font-semibold">{activeWf.name}</h2>
-            <pre className="text-sm bg-[#1a1a1d] p-4 border border-border overflow-auto max-h-[400px] rounded-xl text-foreground">
-{JSON.stringify(activeWf.json, null, 2)}
-            </pre>
+          <div className="bg-surface border border-border rounded-2xl p-6 max-w-2xl w-full max-h-[90vh] overflow-y-auto space-y-4 modal-scrollbar">
+            <div className="flex justify-between items-center">
+              <h2 className="text-xl font-semibold">{activeWf.name}</h2>
+              <button 
+                onClick={() => setShowModal(false)} 
+                title="Close"
+                className="p-2 rounded-lg bg-[#2a2a2d] hover:bg-[#3a3a3d] border border-border transition-all duration-200 hover:shadow-[0_0_8px_#5d5aff] hover:border-highlight action-hover"
+              >
+                <X size={16} className="text-neutral-300 hover:text-white transition-colors" />
+              </button>
+            </div>
+            <div className="relative">
+              <pre className="text-sm bg-[#1a1a1d] p-4 border border-border overflow-auto max-h-[400px] rounded-xl text-foreground json-scrollbar">
+{JSON.stringify(typeof activeWf.json === "string" ? JSON.parse(activeWf.json) : activeWf.json, null, 2)}
+              </pre>
+              <div className="absolute top-2 right-2 flex space-x-2">
+                <button 
+                  onClick={() => copyJSON(activeWf)} 
+                  title="Copy JSON"
+                  className="p-2 rounded-lg bg-[#2a2a2d] hover:bg-[#3a3a3d] border border-border transition-all duration-200 hover:shadow-[0_0_8px_#5d5aff] hover:border-highlight action-hover"
+                >
+                  <Clipboard size={14} className="text-neutral-300 hover:text-white transition-colors" />
+                </button>
+                <button 
+                  onClick={() => downloadJSON(activeWf)} 
+                  title="Download JSON"
+                  className="p-2 rounded-lg bg-[#2a2a2d] hover:bg-[#3a3a3d] border border-border transition-all duration-200 hover:shadow-[0_0_8px_#5d5aff] hover:border-highlight action-hover"
+                >
+                  <Download size={14} className="text-neutral-300 hover:text-white transition-colors" />
+                </button>
+                <button 
+                  onClick={() => handleModalDelete(activeWf.id)} 
+                  title="Delete Workflow"
+                  className="p-2 rounded-lg bg-[#2a2a2d] hover:bg-red-600 border border-border transition-all duration-200 hover:shadow-[0_0_8px_#ff4444] hover:border-red-400 danger-hover"
+                >
+                  <Trash2 size={14} className="text-neutral-300 hover:text-white transition-colors" />
+                </button>
+              </div>
+            </div>
             <div>
               {Object.entries(activeWf.sticky_notes || {}).map(([node, note]) => (
                 <div key={node} className="mt-2">
@@ -150,7 +192,6 @@ export default function WorkflowsPage() {
                 </div>
               ))}
             </div>
-            <Button intent="secondary" onClick={() => setShowModal(false)} className="hover-unified">Close</Button>
           </div>
         </div>
       )}

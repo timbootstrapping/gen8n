@@ -360,4 +360,55 @@ body {
       opacity: 0.3;
     }
   }
+}
+
+/* =================================
+   CUSTOM SCROLLBARS FOR DARK MODE
+   ================================= */
+   
+/* Modal scrollbar */
+.modal-scrollbar::-webkit-scrollbar {
+  width: 8px;
+}
+
+.modal-scrollbar::-webkit-scrollbar-track {
+  background: #1a1a1d;
+  border-radius: 4px;
+}
+
+.modal-scrollbar::-webkit-scrollbar-thumb {
+  background: #3a3a3d;
+  border-radius: 4px;
+  border: 1px solid #2a2a2d;
+}
+
+.modal-scrollbar::-webkit-scrollbar-thumb:hover {
+  background: #4a4a4d;
+  box-shadow: 0 0 4px rgba(162, 89, 255, 0.3);
+}
+
+/* JSON code block scrollbar */
+.json-scrollbar::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+.json-scrollbar::-webkit-scrollbar-track {
+  background: #0f0f0f;
+  border-radius: 3px;
+}
+
+.json-scrollbar::-webkit-scrollbar-thumb {
+  background: #3a3a3d;
+  border-radius: 3px;
+  border: 1px solid #2a2a2d;
+}
+
+.json-scrollbar::-webkit-scrollbar-thumb:hover {
+  background: #4a4a4d;
+  box-shadow: 0 0 3px rgba(162, 89, 255, 0.4);
+}
+
+.json-scrollbar::-webkit-scrollbar-corner {
+  background: #1a1a1d;
 } 
