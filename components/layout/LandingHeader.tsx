@@ -19,8 +19,12 @@ export default function LandingHeader() {
     <header className="fixed top-0 inset-x-0 z-50 border-b border-border bg-background/80 backdrop-blur">
       <div className="flex items-center justify-between px-4 sm:px-8 lg:px-20 h-16">
         {/* Logo */}
-        <Link href="/" className="text-foreground font-bold text-xl tracking-tight nav-hover">
-          Gen8n
+        <Link href="/" className="nav-hover">
+          <img 
+            src="/Gen8n Text LogoIcon 360x100 svg.svg" 
+            alt="Gen8n Logo" 
+            className="h-8 w-auto"
+          />
         </Link>
 
         {/* Desktop Navigation */}

@@ -7,9 +7,15 @@ import {
   Clock,
   Zap,
   List,
+  Clipboard,
+  Download,
+  Trash2,
+  X,
 } from "lucide-react";
 import { Button } from "@/components/ui/Button";
 import { supabase } from "@/lib/supabaseClient";
+import { formatDate } from '@/utils/formatDate';
+import { truncate } from '@/utils/truncate';
 
 interface WorkflowRow {
   id: string;
@@ -18,7 +24,7 @@ interface WorkflowRow {
   status: "pending" | "complete" | "error";
   created_at: string;
   json: any;
-  sticky_notes: any;
+  sticky_notes: Record<string, string>;
 }
 
 export default function Dashboard() {
@@ -28,6 +34,10 @@ export default function Dashboard() {
   const [usage, setUsage] = useState<number>(0);
   const [totalWorkflows, setTotalWorkflows] = useState<number>(0);
   const [recentWorkflows, setRecentWorkflows] = useState<WorkflowRow[]>([]);
+  
+  // modal state
+  const [showModal, setShowModal] = useState(false);
+  const [activeWf, setActiveWf] = useState<WorkflowRow | null>(null);
 
   // form state
   const [name, setName] = useState("");
@@ -145,6 +155,57 @@ export default function Dashboard() {
     }
   };
 
+  // Modal and workflow helper functions
+  const openModal = (wf: WorkflowRow) => {
+    setActiveWf(wf);
+    setShowModal(true);
+  };
+
+  const downloadJSON = (wf: WorkflowRow) => {
+    const jsonData = typeof wf.json === "string" ? JSON.parse(wf.json) : wf.json;
+    const blob = new Blob([JSON.stringify(jsonData, null, 2)], { type: 'application/json' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `${wf.name}.json`;
+    a.click();
+    URL.revokeObjectURL(url);
+  };
+
+  const copyJSON = (wf: WorkflowRow) => {
+    const jsonData = typeof wf.json === "string" ? JSON.parse(wf.json) : wf.json;
+    navigator.clipboard.writeText(JSON.stringify(jsonData, null, 2));
+    alert('Copied to clipboard');
+  };
+
+  const confirmDelete = async (id: string) => {
+    if (confirm('Delete this workflow?')) {
+      await supabase.from('workflows').delete().eq('id', id);
+      setRecentWorkflows((prev) => prev.filter((w) => w.id !== id));
+      setTotalWorkflows((prev) => prev - 1);
+    }
+  };
+
+  const handleModalDelete = async (id: string) => {
+    await confirmDelete(id);
+    setShowModal(false);
+    setActiveWf(null);
+  };
+
+  const getStatusStyle = (status: string) => {
+    switch (status) {
+      case 'complete':
+        return 'text-gray-500';
+      case 'pending':
+        return 'text-yellow-400';
+      case 'error':
+      case 'canceled':
+        return 'text-red-400';
+      default:
+        return 'text-gray-400';
+    }
+  };
+
   if (loading) {
     return (
       <div className="flex justify-center items-center min-h-screen">
@@ -258,69 +319,98 @@ export default function Dashboard() {
         ) : (
           <div className="grid md:grid-cols-3 gap-6">
             {recentWorkflows.map((wf) => (
-              <div
-                key={wf.id}
-                className="bg-surface border border-border rounded-2xl p-4 flex flex-col gap-2 card-hover"
-              >
-                <h3 className="font-medium text-lg truncate" title={wf.name}>{wf.name}</h3>
-                <p className="text-sm text-gray-400 capitalize">Status: {wf.status}</p>
-                <p className="text-xs text-gray-500">
-                  {new Intl.DateTimeFormat(undefined, {
-                    month: "short",
-                    day: "numeric",
-                  }).format(new Date(wf.created_at))}
-                </p>
-
-                <div className="mt-2 flex gap-2 text-sm">
-                  <Button
-                    intent="secondary"
-                    size="sm"
-                    onClick={() => alert(JSON.stringify(wf.json, null, 2))}
-                    className="action-hover"
-                  >
-                    Expand
-                  </Button>
-                  <Button
-                    intent="secondary"
-                    size="sm"
-                    onClick={() => {
-                      const blob = new Blob([
-                        JSON.stringify(wf.json, null, 2),
-                      ], { type: "application/json" });
-                      const url = URL.createObjectURL(blob);
-                      const a = document.createElement("a");
-                      a.href = url;
-                      a.download = `${wf.name}.json`;
-                      a.click();
-                      URL.revokeObjectURL(url);
-                    }}
-                    className="action-hover"
-                  >
-                    Download
-                  </Button>
-                  <Button
-                    intent="secondary"
-                    size="sm"
-                    onClick={async () => {
-                      if (confirm("Delete this workflow?")) {
-                        await supabase
-                          .from("workflows")
-                          .delete()
-                          .eq("id", wf.id);
-                        setRecentWorkflows((prev) => prev.filter((w) => w.id !== wf.id));
-                        setTotalWorkflows((prev) => prev - 1);
-                      }
-                    }}
-                    className="danger-hover"
-                  >
-                    Delete
-                  </Button>
+              <div key={wf.id} className="bg-surface rounded-2xl p-4 border border-border card-hover">
+                <div className="mb-2">
+                  <h2 className="text-lg font-semibold truncate" title={wf.name}>{wf.name}</h2>
+                </div>
+                <p className="text-sm text-neutral-300 mb-3">{truncate(wf.description, 120)}</p>
+                <p className={`text-xs ${getStatusStyle(wf.status)} mb-3`}>Status: {wf.status}</p>
+                <div className="flex justify-between items-center mt-2">
+                  <div className="flex gap-2 flex-wrap">
+                    <Button size="sm" onClick={() => openModal(wf)} className="action-hover">View</Button>
+                    <button 
+                      onClick={() => copyJSON(wf)} 
+                      title="Copy JSON"
+                      className="p-2 rounded-lg bg-[#2a2a2d] hover:bg-[#3a3a3d] border border-border transition-all duration-200 hover:shadow-[0_0_8px_#5d5aff] hover:border-highlight action-hover"
+                    >
+                      <Clipboard size={14} className="text-neutral-300 hover:text-white transition-colors" />
+                    </button>
+                    <button 
+                      onClick={() => downloadJSON(wf)} 
+                      title="Download JSON"
+                      className="p-2 rounded-lg bg-[#2a2a2d] hover:bg-[#3a3a3d] border border-border transition-all duration-200 hover:shadow-[0_0_8px_#5d5aff] hover:border-highlight action-hover"
+                    >
+                      <Download size={14} className="text-neutral-300 hover:text-white transition-colors" />
+                    </button>
+                    <button 
+                      onClick={() => confirmDelete(wf.id)} 
+                      title="Delete Workflow"
+                      className="p-2 rounded-lg bg-[#2a2a2d] hover:bg-red-600 border border-border transition-all duration-200 hover:shadow-[0_0_8px_#ff4444] hover:border-red-400 danger-hover"
+                    >
+                      <Trash2 size={14} className="text-neutral-300 hover:text-white transition-colors" />
+                    </button>
+                  </div>
+                  <span className="text-xs text-neutral-400 ml-2">{formatDate(wf.created_at)}</span>
                 </div>
               </div>
             ))}
           </div>
         )}
       </div>
+
+      {/* modal */}
+      {showModal && activeWf && (
+        <div className="fixed inset-0 bg-black/60 flex items-center justify-center z-50">
+          <div className="bg-surface border border-border rounded-2xl p-6 max-w-2xl w-full max-h-[90vh] overflow-y-auto space-y-4 modal-scrollbar">
+            <div className="flex justify-between items-center">
+              <h2 className="text-xl font-semibold">{activeWf.name}</h2>
+              <button 
+                onClick={() => setShowModal(false)} 
+                title="Close"
+                className="p-2 rounded-lg bg-[#2a2a2d] hover:bg-[#3a3a3d] border border-border transition-all duration-200 hover:shadow-[0_0_8px_#5d5aff] hover:border-highlight action-hover"
+              >
+                <X size={16} className="text-neutral-300 hover:text-white transition-colors" />
+              </button>
+            </div>
+            <div className="relative">
+              <pre className="text-sm bg-[#1a1a1d] p-4 border border-border overflow-auto max-h-[400px] rounded-xl text-foreground json-scrollbar">
+{JSON.stringify(typeof activeWf.json === "string" ? JSON.parse(activeWf.json) : activeWf.json, null, 2)}
+              </pre>
+              <div className="absolute top-2 right-2 flex space-x-2">
+                <button 
+                  onClick={() => copyJSON(activeWf)} 
+                  title="Copy JSON"
+                  className="p-2 rounded-lg bg-[#2a2a2d] hover:bg-[#3a3a3d] border border-border transition-all duration-200 hover:shadow-[0_0_8px_#5d5aff] hover:border-highlight action-hover"
+                >
+                  <Clipboard size={14} className="text-neutral-300 hover:text-white transition-colors" />
+                </button>
+                <button 
+                  onClick={() => downloadJSON(activeWf)} 
+                  title="Download JSON"
+                  className="p-2 rounded-lg bg-[#2a2a2d] hover:bg-[#3a3a3d] border border-border transition-all duration-200 hover:shadow-[0_0_8px_#5d5aff] hover:border-highlight action-hover"
+                >
+                  <Download size={14} className="text-neutral-300 hover:text-white transition-colors" />
+                </button>
+                <button 
+                  onClick={() => handleModalDelete(activeWf.id)} 
+                  title="Delete Workflow"
+                  className="p-2 rounded-lg bg-[#2a2a2d] hover:bg-red-600 border border-border transition-all duration-200 hover:shadow-[0_0_8px_#ff4444] hover:border-red-400 danger-hover"
+                >
+                  <Trash2 size={14} className="text-neutral-300 hover:text-white transition-colors" />
+                </button>
+              </div>
+            </div>
+            <div>
+              {Object.entries(activeWf.sticky_notes || {}).map(([node, note]) => (
+                <div key={node} className="mt-2">
+                  <strong className="text-highlight">{node}:</strong>
+                  <p className="text-sm text-neutral-300">{note}</p>
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

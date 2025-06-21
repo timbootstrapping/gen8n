@@ -86,6 +86,19 @@ export default function WorkflowsPage() {
     }
   };
 
+  const getStatusStyle = (status: string) => {
+    switch (status) {
+      case 'ready':
+        return 'text-gray-500';
+      case 'pending':
+        return 'text-yellow-400';
+      case 'error':
+        return 'text-red-400';
+      default:
+        return 'text-gray-400';
+    }
+  };
+
   const handleModalDelete = async (id: string) => {
     await confirmDelete(id);
     setShowModal(false);
@@ -116,19 +129,39 @@ export default function WorkflowsPage() {
         <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
           {filtered.map((wf) => (
             <div key={wf.id} className="bg-surface rounded-2xl p-4 border border-border card-hover">
-              <div className="flex justify-between items-center mb-2">
+              <div className="mb-2">
                 <h2 className="text-lg font-semibold truncate" title={wf.name}>{wf.name}</h2>
-                <span className="text-xs text-neutral-400">{formatDate(wf.created_at)}</span>
               </div>
               <p className="text-sm text-neutral-300 mb-3">{truncate(wf.description, 120)}</p>
               {wf.status !== 'ready' && (
-                <p className="text-xs text-yellow-400">Status: {wf.status}</p>
+                <p className={`text-xs ${getStatusStyle(wf.status)} mb-3`}>Status: {wf.status}</p>
               )}
-              <div className="flex gap-2 flex-wrap mt-2">
-                <Button size="sm" onClick={() => openModal(wf)} className="action-hover">View</Button>
-                <Button intent="secondary" size="sm" onClick={() => downloadJSON(wf)} className="action-hover">Download</Button>
-                <Button intent="secondary" size="sm" onClick={() => copyJSON(wf)} className="action-hover">Copy</Button>
-                <Button intent="secondary" size="sm" className="danger-hover" onClick={() => confirmDelete(wf.id)}>Delete</Button>
+              <div className="flex justify-between items-center mt-2">
+                <div className="flex gap-2 flex-wrap">
+                  <Button size="sm" onClick={() => openModal(wf)} className="action-hover">View</Button>
+                  <button 
+                    onClick={() => copyJSON(wf)} 
+                    title="Copy JSON"
+                    className="p-2 rounded-lg bg-[#2a2a2d] hover:bg-[#3a3a3d] border border-border transition-all duration-200 hover:shadow-[0_0_8px_#5d5aff] hover:border-highlight action-hover"
+                  >
+                    <Clipboard size={14} className="text-neutral-300 hover:text-white transition-colors" />
+                  </button>
+                  <button 
+                    onClick={() => downloadJSON(wf)} 
+                    title="Download JSON"
+                    className="p-2 rounded-lg bg-[#2a2a2d] hover:bg-[#3a3a3d] border border-border transition-all duration-200 hover:shadow-[0_0_8px_#5d5aff] hover:border-highlight action-hover"
+                  >
+                    <Download size={14} className="text-neutral-300 hover:text-white transition-colors" />
+                  </button>
+                  <button 
+                    onClick={() => confirmDelete(wf.id)} 
+                    title="Delete Workflow"
+                    className="p-2 rounded-lg bg-[#2a2a2d] hover:bg-red-600 border border-border transition-all duration-200 hover:shadow-[0_0_8px_#ff4444] hover:border-red-400 danger-hover"
+                  >
+                    <Trash2 size={14} className="text-neutral-300 hover:text-white transition-colors" />
+                  </button>
+                </div>
+                <span className="text-xs text-neutral-400 ml-2">{formatDate(wf.created_at)}</span>
               </div>
             </div>
           ))}

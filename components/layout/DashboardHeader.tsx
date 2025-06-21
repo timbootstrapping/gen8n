@@ -8,8 +8,12 @@ export default function DashboardHeader() {
   return (
     <header className="w-full bg-surface border-b border-border">
       <div className="max-w-[1200px] mx-auto px-4 sm:px-8 flex items-center justify-between py-4">
-        <Link href="/dashboard" className="text-xl font-bold text-highlight nav-hover">
-          Gen8n
+        <Link href="/dashboard" className="nav-hover">
+          <img 
+            src="/Gen8n Text LogoIcon 360x100 svg.svg" 
+            alt="Gen8n Logo" 
+            className="h-8 w-auto"
+          />
         </Link>
         <nav className="flex items-center gap-6 text-sm">
           <Link href="/dashboard" className="nav-hover">

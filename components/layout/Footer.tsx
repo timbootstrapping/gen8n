@@ -11,7 +11,13 @@ export default function Footer() {
   return (
     <footer className="py-10 border-t border-border bg-background">
       <div className="max-w-[1200px] mx-auto px-4 sm:px-8 flex flex-col md:flex-row items-center justify-between gap-6">
-        <Link href="/" className="font-bold text-xl hover-glow">Gen8n</Link>
+        <Link href="/" className="hover-glow">
+          <img 
+            src="/Gen8n Text LogoIcon 360x100 svg.svg" 
+            alt="Gen8n Logo" 
+            className="h-8 w-auto"
+          />
+        </Link>
         <nav className="flex gap-6 flex-wrap text-sm">
           {nav.map(({ href, label }) => (
             <Link key={href} href={href} className="hover:text-highlight transition-colors duration-300 hover-glow">
