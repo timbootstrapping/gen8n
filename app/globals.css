@@ -48,12 +48,12 @@ body {
 
 .hover-unified:hover {
   transform: scale(1.03);
-  box-shadow: 0 0 10px rgba(162, 89, 255, 0.4);
+  box-shadow: 0 0 10px rgba(139, 92, 246, 0.4);
 }
 
 .hover-unified:active {
   transform: scale(0.98);
-  box-shadow: 0 0 5px rgba(162, 89, 255, 0.3);
+  box-shadow: 0 0 5px rgba(139, 92, 246, 0.3);
 }
 
 /* Card hover effects */
@@ -65,21 +65,21 @@ body {
 .card-hover:hover {
   transform: translateY(-2px) scale(1.02);
   box-shadow: 
-    0 0 15px rgba(162, 89, 255, 0.3),
+    0 0 15px rgba(139, 92, 246, 0.3),
     0 8px 25px rgba(0, 0, 0, 0.15);
 }
 
 .card-hover:active {
   transform: translateY(-1px) scale(1.01);
   box-shadow: 
-    0 0 8px rgba(162, 89, 255, 0.2),
+    0 0 8px rgba(139, 92, 246, 0.2),
     0 4px 15px rgba(0, 0, 0, 0.1);
 }
 
 /* Icons glow when their parent is hovered */
 .card-hover:hover .icon-hover,
 .hover-unified:hover .icon-hover {
-  filter: drop-shadow(0 0 8px rgba(162, 89, 255, 0.6));
+  filter: drop-shadow(0 0 8px rgba(139, 92, 246, 0.6));
   transform: scale(1.1);
 }
 
@@ -90,7 +90,7 @@ body {
 }
 
 .icon-hover:hover {
-  filter: drop-shadow(0 0 8px rgba(162, 89, 255, 0.5));
+  filter: drop-shadow(0 0 8px rgba(139, 92, 246, 0.5));
   transform: scale(1.1);
 }
 
@@ -101,8 +101,8 @@ body {
 }
 
 .nav-hover:hover {
-  color: #a259ff;
-  filter: drop-shadow(0 0 6px rgba(162, 89, 255, 0.4));
+  color: #8b5cf6;
+  filter: drop-shadow(0 0 6px rgba(139, 92, 246, 0.4));
   transform: scale(1.05);
 }
 
@@ -112,13 +112,13 @@ body {
 }
 
 .input-hover:hover {
-  border-color: rgba(162, 89, 255, 0.5);
-  box-shadow: 0 0 8px rgba(162, 89, 255, 0.2);
+  border-color: rgba(139, 92, 246, 0.5);
+  box-shadow: 0 0 8px rgba(139, 92, 246, 0.2);
 }
 
 .input-hover:focus {
-  border-color: #a259ff;
-  box-shadow: 0 0 12px rgba(162, 89, 255, 0.4);
+  border-color: #8b5cf6;
+  box-shadow: 0 0 12px rgba(139, 92, 246, 0.4);
 }
 
 /* Toggle and control hover effects */
@@ -128,7 +128,7 @@ body {
 }
 
 .toggle-hover:hover {
-  box-shadow: 0 0 8px rgba(162, 89, 255, 0.3);
+  box-shadow: 0 0 8px rgba(139, 92, 246, 0.3);
   transform: scale(1.05);
 }
 
@@ -140,12 +140,12 @@ body {
 
 .action-hover:hover {
   transform: scale(1.05);
-  box-shadow: 0 0 10px rgba(162, 89, 255, 0.3);
+  box-shadow: 0 0 10px rgba(139, 92, 246, 0.3);
 }
 
 .action-hover:active {
   transform: scale(1.02);
-  box-shadow: 0 0 6px rgba(162, 89, 255, 0.2);
+  box-shadow: 0 0 6px rgba(139, 92, 246, 0.2);
 }
 
 /* Danger/delete action hover effects */
@@ -171,8 +171,8 @@ body {
 
 /* Updated Hero Button Styles */
 .hero-primary-button {
-  background: #7c3aed !important;
-  border: 1px solid rgba(124, 58, 237, 0.3) !important;
+  background: #8b5cf6 !important;
+  border: 1px solid rgba(139, 92, 246, 0.3) !important;
   color: white !important;
   font-weight: 600 !important;
   box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2) !important;
@@ -183,7 +183,7 @@ body {
   background: j
    !important;
   box-shadow: 
-    0 0 20px rgba(124, 58, 237, 0.4),
+    0 0 20px rgba(139, 92, 246, 0.4),
     0 6px 25px rgba(0, 0, 0, 0.3) !important;
   transform: translateY(-2px) !important;
 }
@@ -198,8 +198,8 @@ body {
 
 .hero-secondary-button:hover {
   background: rgba(255, 255, 255, 0.15) !important;
-  box-shadow: 0 0 16px rgba(124, 58, 237, 0.3) !important;
-  border-color: rgba(124, 58, 237, 0.5) !important;
+  box-shadow: 0 0 16px rgba(139, 92, 246, 0.3) !important;
+  border-color: rgba(139, 92, 246, 0.5) !important;
   transform: translateY(-2px) !important;
 }
 
@@ -221,15 +221,15 @@ body {
   opacity: 0.7;
   transition: all 0.3s ease;
   box-shadow: 
-    0 0 10px rgba(124, 58, 237, 0.2),
+    0 0 10px rgba(139, 92, 246, 0.2),
     inset 0 0 10px rgba(255, 255, 255, 0.1);
 }
 
 .mouse:hover {
   opacity: 1;
-  border-color: rgba(124, 58, 237, 0.6);
+  border-color: rgba(139, 92, 246, 0.6);
   box-shadow: 
-    0 0 20px rgba(124, 58, 237, 0.4),
+    0 0 20px rgba(139, 92, 246, 0.4),
     inset 0 0 15px rgba(255, 255, 255, 0.2);
   transform: scale(1.05);
 }
@@ -244,7 +244,7 @@ body {
   left: 50%;
   transform: translateX(-50%);
   animation: scroll-bounce 1.4s infinite ease-in-out;
-  box-shadow: 0 0 20px rgba(124, 58, 237, 0.5);
+  box-shadow: 0 0 20px rgba(139, 92, 246, 0.5);
 }
 
 @keyframes scroll-bounce {
@@ -384,7 +384,7 @@ body {
 
 .modal-scrollbar::-webkit-scrollbar-thumb:hover {
   background: #4a4a4d;
-  box-shadow: 0 0 4px rgba(162, 89, 255, 0.3);
+  box-shadow: 0 0 4px rgba(139, 92, 246, 0.3);
 }
 
 /* JSON code block scrollbar */
@@ -406,9 +406,23 @@ body {
 
 .json-scrollbar::-webkit-scrollbar-thumb:hover {
   background: #4a4a4d;
-  box-shadow: 0 0 3px rgba(162, 89, 255, 0.4);
+  box-shadow: 0 0 3px rgba(139, 92, 246, 0.4);
 }
 
 .json-scrollbar::-webkit-scrollbar-corner {
-  background: #1a1a1d;
+  background: rgba(0, 0, 0, 0.2);
+}
+
+/* Slide-in animation for slide-out panels */
+@keyframes slide-in-right {
+  from {
+    transform: translateX(100%);
+  }
+  to {
+    transform: translateX(0);
+  }
+}
+
+.animate-slide-in-right {
+  animation: slide-in-right 0.3s ease-out;
 } 

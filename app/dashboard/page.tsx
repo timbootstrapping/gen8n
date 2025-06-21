@@ -11,6 +11,7 @@ import {
   Download,
   Trash2,
   X,
+  ChevronRight,
 } from "lucide-react";
 import { Button } from "@/components/ui/Button";
 import { supabase } from "@/lib/supabaseClient";
@@ -34,9 +35,10 @@ export default function Dashboard() {
   const [usage, setUsage] = useState<number>(0);
   const [totalWorkflows, setTotalWorkflows] = useState<number>(0);
   const [recentWorkflows, setRecentWorkflows] = useState<WorkflowRow[]>([]);
+  const [allWorkflows, setAllWorkflows] = useState<WorkflowRow[]>([]);
   
-  // modal state
-  const [showModal, setShowModal] = useState(false);
+  // slide-out state
+  const [showSlideOut, setShowSlideOut] = useState(false);
   const [activeWf, setActiveWf] = useState<WorkflowRow | null>(null);
 
   // form state
@@ -80,6 +82,15 @@ export default function Dashboard() {
         .limit(3);
 
       setRecentWorkflows(recent ?? []);
+
+      // all workflows for the "View all Workflows" section
+      const { data: all } = await supabase
+        .from("workflows")
+        .select("*")
+        .eq("user_id", user.id)
+        .order("created_at", { ascending: false });
+
+      setAllWorkflows(all ?? []);
     };
 
     fetchStats();
@@ -158,7 +169,7 @@ export default function Dashboard() {
   // Modal and workflow helper functions
   const openModal = (wf: WorkflowRow) => {
     setActiveWf(wf);
-    setShowModal(true);
+    setShowSlideOut(true);
   };
 
   const downloadJSON = (wf: WorkflowRow) => {
@@ -182,13 +193,14 @@ export default function Dashboard() {
     if (confirm('Delete this workflow?')) {
       await supabase.from('workflows').delete().eq('id', id);
       setRecentWorkflows((prev) => prev.filter((w) => w.id !== id));
+      setAllWorkflows((prev) => prev.filter((w) => w.id !== id));
       setTotalWorkflows((prev) => prev - 1);
     }
   };
 
   const handleModalDelete = async (id: string) => {
     await confirmDelete(id);
-    setShowModal(false);
+    setShowSlideOut(false);
     setActiveWf(null);
   };
 
@@ -280,25 +292,63 @@ export default function Dashboard() {
           </Button>
         </form>
 
-        {/* View workflows card */}
-        <div className="bg-surface border border-border rounded-2xl p-6 flex flex-col justify-between gap-6 card-hover">
+        {/* View workflows section */}
+        <div className="bg-surface border border-border rounded-2xl p-6 flex flex-col gap-6">
           <div className="flex items-center gap-3">
             <List
               size={28}
               strokeWidth={1}
-              className="text-highlight drop-shadow-[0_0_6px_#5d5aff] icon-hover"
+              className="text-highlight drop-shadow-[0_0_6px_#8b5cf6] icon-hover"
             />
             <h2 className="text-2xl font-semibold">View All Workflows</h2>
           </div>
-          <p className="text-gray-400">
-            Manage and download your existing workflows
-          </p>
-          <Button intent="secondary" rounded="full" size="lg" onClick={() => (window.location.href = "/workflows")} className="hover-unified"
-          >
-            View All Workflows
-          </Button>
+          
+          {allWorkflows.length === 0 ? (
+            <div className="flex flex-col items-center gap-4 py-10">
+              <p className="text-gray-400">
+                Manage and download your existing workflows
+              </p>
+              <Button intent="secondary" rounded="full" size="lg" onClick={() => (window.location.href = "/workflows")} className="hover-unified">
+                View All Workflows
+              </Button>
+            </div>
+          ) : (
+            <div className="space-y-3">
+              {allWorkflows.slice(0, 5).map((wf) => (
+                <div 
+                  key={wf.id} 
+                  className="flex items-center justify-between p-3 bg-[#1a1a1d] border border-border rounded-xl hover:bg-[#2a2a2d] transition-all duration-200 cursor-pointer card-hover"
+                  onClick={() => openModal(wf)}
+                >
+                  <div className="flex items-center gap-4 flex-1">
+                    <div className="w-12 text-center">
+                      <span className="text-lg font-semibold text-highlight">
+                        {wf.name.substring(0, 3).toUpperCase()}
+                      </span>
+                    </div>
+                    <div className={`px-2 py-1 rounded-full text-xs ${getStatusStyle(wf.status)}`}>
+                      {wf.status}
+                    </div>
+                    <div className="text-sm text-gray-400">
+                      {formatDate(wf.created_at)}
+                    </div>
+                  </div>
+                  <ChevronRight size={20} className="text-gray-400" />
+                </div>
+              ))}
+              {allWorkflows.length > 5 && (
+                <div className="text-center pt-4">
+                  <Button intent="secondary" size="sm" onClick={() => (window.location.href = "/workflows")} className="hover-unified">
+                    View All {allWorkflows.length} Workflows
+                  </Button>
+                </div>
+              )}
+            </div>
+          )}
         </div>
       </div>
+      
+
 
       {/* Recent workflows */}
       <div className="space-y-6">
@@ -309,7 +359,7 @@ export default function Dashboard() {
             <Zap
               size={40}
               strokeWidth={1}
-              className="text-highlight drop-shadow-[0_0_6px_#5d5aff] icon-hover"
+              className="text-highlight drop-shadow-[0_0_6px_#8b5cf6] icon-hover"
             />
             <p>No workflows yet</p>
             <Button onClick={() => document.querySelector("form")?.scrollIntoView({ behavior: "smooth" })} className="hover-unified">
@@ -331,14 +381,14 @@ export default function Dashboard() {
                     <button 
                       onClick={() => copyJSON(wf)} 
                       title="Copy JSON"
-                      className="p-2 rounded-lg bg-[#2a2a2d] hover:bg-[#3a3a3d] border border-border transition-all duration-200 hover:shadow-[0_0_8px_#5d5aff] hover:border-highlight action-hover"
+                      className="p-2 rounded-lg bg-[#2a2a2d] hover:bg-[#3a3a3d] border border-border transition-all duration-200 hover:shadow-[0_0_8px_#8b5cf6] hover:border-highlight action-hover"
                     >
                       <Clipboard size={14} className="text-neutral-300 hover:text-white transition-colors" />
                     </button>
                     <button 
                       onClick={() => downloadJSON(wf)} 
                       title="Download JSON"
-                      className="p-2 rounded-lg bg-[#2a2a2d] hover:bg-[#3a3a3d] border border-border transition-all duration-200 hover:shadow-[0_0_8px_#5d5aff] hover:border-highlight action-hover"
+                      className="p-2 rounded-lg bg-[#2a2a2d] hover:bg-[#3a3a3d] border border-border transition-all duration-200 hover:shadow-[0_0_8px_#8b5cf6] hover:border-highlight action-hover"
                     >
                       <Download size={14} className="text-neutral-300 hover:text-white transition-colors" />
                     </button>
@@ -358,16 +408,20 @@ export default function Dashboard() {
         )}
       </div>
 
-      {/* modal */}
-      {showModal && activeWf && (
-        <div className="fixed inset-0 bg-black/60 flex items-center justify-center z-50">
-          <div className="bg-surface border border-border rounded-2xl p-6 max-w-2xl w-full max-h-[90vh] overflow-y-auto space-y-4 modal-scrollbar">
+      {/* slide-out */}
+      {showSlideOut && activeWf && (
+        <div className="fixed inset-0 bg-black/60 z-50 flex">
+          <div 
+            className="flex-1 cursor-pointer" 
+            onClick={() => setShowSlideOut(false)}
+          />
+          <div className="bg-surface border-l border-border w-full max-w-2xl h-full overflow-y-auto p-6 space-y-4 modal-scrollbar animate-slide-in-right">
             <div className="flex justify-between items-center">
               <h2 className="text-xl font-semibold">{activeWf.name}</h2>
               <button 
-                onClick={() => setShowModal(false)} 
+                onClick={() => setShowSlideOut(false)} 
                 title="Close"
-                className="p-2 rounded-lg bg-[#2a2a2d] hover:bg-[#3a3a3d] border border-border transition-all duration-200 hover:shadow-[0_0_8px_#5d5aff] hover:border-highlight action-hover"
+                className="p-2 rounded-lg bg-[#2a2a2d] hover:bg-[#3a3a3d] border border-border transition-all duration-200 hover:shadow-[0_0_8px_#8b5cf6] hover:border-highlight action-hover"
               >
                 <X size={16} className="text-neutral-300 hover:text-white transition-colors" />
               </button>
@@ -380,14 +434,14 @@ export default function Dashboard() {
                 <button 
                   onClick={() => copyJSON(activeWf)} 
                   title="Copy JSON"
-                  className="p-2 rounded-lg bg-[#2a2a2d] hover:bg-[#3a3a3d] border border-border transition-all duration-200 hover:shadow-[0_0_8px_#5d5aff] hover:border-highlight action-hover"
+                  className="p-2 rounded-lg bg-[#2a2a2d] hover:bg-[#3a3a3d] border border-border transition-all duration-200 hover:shadow-[0_0_8px_#8b5cf6] hover:border-highlight action-hover"
                 >
                   <Clipboard size={14} className="text-neutral-300 hover:text-white transition-colors" />
                 </button>
                 <button 
                   onClick={() => downloadJSON(activeWf)} 
                   title="Download JSON"
-                  className="p-2 rounded-lg bg-[#2a2a2d] hover:bg-[#3a3a3d] border border-border transition-all duration-200 hover:shadow-[0_0_8px_#5d5aff] hover:border-highlight action-hover"
+                  className="p-2 rounded-lg bg-[#2a2a2d] hover:bg-[#3a3a3d] border border-border transition-all duration-200 hover:shadow-[0_0_8px_#8b5cf6] hover:border-highlight action-hover"
                 >
                   <Download size={14} className="text-neutral-300 hover:text-white transition-colors" />
                 </button>
@@ -433,7 +487,7 @@ function StatCard({
       <Icon
         size={32}
         strokeWidth={1}
-        className="text-highlight group-hover:drop-shadow-[0_0_6px_#5d5aff] transition icon-hover"
+        className="text-highlight group-hover:drop-shadow-[0_0_6px_#8b5cf6] transition icon-hover"
       />
       <div>
         <p className="text-sm text-gray-400">{title}</p>

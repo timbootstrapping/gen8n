@@ -6,7 +6,8 @@ import { supabase } from '@/lib/supabaseClient';
 import { formatDate } from '@/utils/formatDate';
 import { truncate } from '@/utils/truncate';
 import { Button } from '@/components/ui/Button';
-import { Zap, Clipboard, Download, Trash2, X } from 'lucide-react';
+import { Zap, Clipboard, Download, Trash2, X, ArrowLeft } from 'lucide-react';
+import Link from 'next/link';
 
 interface WorkflowRow {
   id: string;
@@ -109,6 +110,17 @@ export default function WorkflowsPage() {
 
   return (
     <div className="max-w-[1200px] mx-auto px-4 sm:px-8 py-6 space-y-8">
+      {/* Back Navigation */}
+      <div className="mb-8">
+        <Link 
+          href="/dashboard" 
+          className="inline-flex items-center gap-2 text-foreground/70 hover:text-foreground nav-hover"
+        >
+          <ArrowLeft size={16} />
+          Back to Dashboard
+        </Link>
+      </div>
+
       <h1 className="text-3xl font-bold">Your Workflows</h1>
 
       {/* search */}
@@ -122,7 +134,7 @@ export default function WorkflowsPage() {
 
       {filtered.length === 0 ? (
         <div className="flex flex-col items-center gap-4 py-20">
-          <Zap size={40} strokeWidth={1} className="text-highlight drop-shadow-[0_0_6px_#5d5aff] icon-hover" />
+          <Zap size={40} strokeWidth={1} className="text-highlight drop-shadow-[0_0_6px_#8b5cf6] icon-hover" />
           <p>No workflows found</p>
         </div>
       ) : (
@@ -142,14 +154,14 @@ export default function WorkflowsPage() {
                   <button 
                     onClick={() => copyJSON(wf)} 
                     title="Copy JSON"
-                    className="p-2 rounded-lg bg-[#2a2a2d] hover:bg-[#3a3a3d] border border-border transition-all duration-200 hover:shadow-[0_0_8px_#5d5aff] hover:border-highlight action-hover"
+                    className="p-2 rounded-lg bg-[#2a2a2d] hover:bg-[#3a3a3d] border border-border transition-all duration-200 hover:shadow-[0_0_8px_#8b5cf6] hover:border-highlight action-hover"
                   >
                     <Clipboard size={14} className="text-neutral-300 hover:text-white transition-colors" />
                   </button>
                   <button 
                     onClick={() => downloadJSON(wf)} 
                     title="Download JSON"
-                    className="p-2 rounded-lg bg-[#2a2a2d] hover:bg-[#3a3a3d] border border-border transition-all duration-200 hover:shadow-[0_0_8px_#5d5aff] hover:border-highlight action-hover"
+                    className="p-2 rounded-lg bg-[#2a2a2d] hover:bg-[#3a3a3d] border border-border transition-all duration-200 hover:shadow-[0_0_8px_#8b5cf6] hover:border-highlight action-hover"
                   >
                     <Download size={14} className="text-neutral-300 hover:text-white transition-colors" />
                   </button>
@@ -184,7 +196,7 @@ export default function WorkflowsPage() {
               <button 
                 onClick={() => setShowModal(false)} 
                 title="Close"
-                className="p-2 rounded-lg bg-[#2a2a2d] hover:bg-[#3a3a3d] border border-border transition-all duration-200 hover:shadow-[0_0_8px_#5d5aff] hover:border-highlight action-hover"
+                className="p-2 rounded-lg bg-[#2a2a2d] hover:bg-[#3a3a3d] border border-border transition-all duration-200 hover:shadow-[0_0_8px_#8b5cf6] hover:border-highlight action-hover"
               >
                 <X size={16} className="text-neutral-300 hover:text-white transition-colors" />
               </button>
@@ -197,14 +209,14 @@ export default function WorkflowsPage() {
                 <button 
                   onClick={() => copyJSON(activeWf)} 
                   title="Copy JSON"
-                  className="p-2 rounded-lg bg-[#2a2a2d] hover:bg-[#3a3a3d] border border-border transition-all duration-200 hover:shadow-[0_0_8px_#5d5aff] hover:border-highlight action-hover"
+                  className="p-2 rounded-lg bg-[#2a2a2d] hover:bg-[#3a3a3d] border border-border transition-all duration-200 hover:shadow-[0_0_8px_#8b5cf6] hover:border-highlight action-hover"
                 >
                   <Clipboard size={14} className="text-neutral-300 hover:text-white transition-colors" />
                 </button>
                 <button 
                   onClick={() => downloadJSON(activeWf)} 
                   title="Download JSON"
-                  className="p-2 rounded-lg bg-[#2a2a2d] hover:bg-[#3a3a3d] border border-border transition-all duration-200 hover:shadow-[0_0_8px_#5d5aff] hover:border-highlight action-hover"
+                  className="p-2 rounded-lg bg-[#2a2a2d] hover:bg-[#3a3a3d] border border-border transition-all duration-200 hover:shadow-[0_0_8px_#8b5cf6] hover:border-highlight action-hover"
                 >
                   <Download size={14} className="text-neutral-300 hover:text-white transition-colors" />
                 </button>

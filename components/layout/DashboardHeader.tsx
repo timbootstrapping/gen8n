@@ -22,9 +22,6 @@ export default function DashboardHeader() {
           <Link href="/workflows" className="nav-hover">
             Workflows
           </Link>
-          <Link href="/generate" className="nav-hover">
-            Generate
-          </Link>
           <button aria-label="Notifications" className="icon-hover">
             <Bell size={20} strokeWidth={1} />
           </button>

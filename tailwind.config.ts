@@ -12,7 +12,7 @@ const config: Config = {
       colors: {
         background: '#121213',
         foreground: '#ededed',
-        highlight: '#5d5aff',
+        highlight: '#8b5cf6',
         border: '#2c2c2c',
         surface: '#18181a'
       },

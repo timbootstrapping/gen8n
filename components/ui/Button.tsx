@@ -9,9 +9,9 @@ const buttonStyles = cva(
   {
     variants: {
       intent: {
-        primary: 'bg-highlight text-foreground hover:bg-highlight/90 hover:shadow-[0_0_10px_rgba(162,89,255,0.4)] hover:scale-[1.03] active:scale-[0.98] active:shadow-[0_0_5px_rgba(162,89,255,0.3)]',
-        secondary: 'border border-border text-foreground hover:bg-border/20 hover:shadow-[0_0_10px_rgba(162,89,255,0.3)] hover:scale-[1.03] active:scale-[0.98] active:shadow-[0_0_5px_rgba(162,89,255,0.2)]',
-        ghost: 'text-foreground hover:bg-surface hover:shadow-[0_0_8px_rgba(162,89,255,0.2)] hover:scale-[1.03] active:scale-[0.98]',
+        primary: 'bg-highlight text-foreground hover:bg-highlight/90 hover:shadow-[0_0_10px_rgba(139,92,246,0.4)] hover:scale-[1.03] active:scale-[0.98] active:shadow-[0_0_5px_rgba(139,92,246,0.3)]',
+        secondary: 'border border-border text-foreground hover:bg-border/20 hover:shadow-[0_0_10px_rgba(139,92,246,0.3)] hover:scale-[1.03] active:scale-[0.98] active:shadow-[0_0_5px_rgba(139,92,246,0.2)]',
+        ghost: 'text-foreground hover:bg-surface hover:shadow-[0_0_8px_rgba(139,92,246,0.2)] hover:scale-[1.03] active:scale-[0.98]',
         danger: 'bg-red-600 text-white hover:bg-red-700 hover:shadow-[0_0_10px_rgba(239,68,68,0.4)] hover:scale-[1.03] active:scale-[0.98]'
       },
       size: {

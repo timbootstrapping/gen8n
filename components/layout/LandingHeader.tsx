@@ -17,7 +17,7 @@ export default function LandingHeader() {
 
   return (
     <header className="fixed top-0 inset-x-0 z-50 border-b border-border bg-background/80 backdrop-blur">
-      <div className="flex items-center justify-between px-4 sm:px-8 lg:px-20 h-16">
+      <div className="max-w-[1200px] mx-auto flex items-center justify-between px-4 sm:px-8 lg:px-20 h-16">
         {/* Logo */}
         <Link href="/" className="nav-hover">
           <img 
