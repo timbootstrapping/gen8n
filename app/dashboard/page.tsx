@@ -46,7 +46,6 @@ export default function Dashboard() {
   const [name, setName] = useState("");
   const [description, setDescription] = useState("");
   const [nodes, setNodes] = useState("");
-  const [baseUrl, setBaseUrl] = useState("");
   const [submitting, setSubmitting] = useState(false);
   const [formMsg, setFormMsg] = useState("");
 
@@ -143,7 +142,6 @@ export default function Dashboard() {
           name,
           description,
           nodes,
-          base_url: baseUrl,
           user_id: user.id,
         }),
       });
@@ -279,13 +277,6 @@ export default function Dashboard() {
             value={nodes}
             onChange={(e) => setNodes(e.target.value)}
             placeholder="Suggested nodes (optional)"
-            className="bg-transparent border border-border rounded-2xl px-4 py-2 focus:border-highlight outline-none input-hover"
-          />
-          <input
-            type="url"
-            value={baseUrl}
-            onChange={(e) => setBaseUrl(e.target.value)}
-            placeholder="n8n Base URL"
             className="bg-transparent border border-border rounded-2xl px-4 py-2 focus:border-highlight outline-none input-hover"
           />
           {formMsg && <p className="text-sm text-highlight">{formMsg}</p>}

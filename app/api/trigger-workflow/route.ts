@@ -28,6 +28,23 @@ export async function POST(req: NextRequest) {
       return new NextResponse("Error fetching user settings", { status: 500 });
     }
 
+    // Fetch n8n base URL from profile table
+    const { data: profile, error: profileError } = await supabaseAdmin
+      .from('profile')
+      .select('n8n_base_url')
+      .eq('user_id', body.user_id)
+      .single();
+
+    if (profileError) {
+      console.error("Error fetching user profile:", profileError);
+      return new NextResponse("Error fetching user profile", { status: 500 });
+    }
+
+    // Check if n8n base URL is configured
+    if (!profile?.n8n_base_url) {
+      return new NextResponse("n8n Base URL not configured. Please set it in your settings.", { status: 400 });
+    }
+
     // Build API keys object (only include non-null keys)
     const api_keys: Record<string, string> = {};
     if (settings.anthropic_key) api_keys.anthropic = settings.anthropic_key;
@@ -42,7 +59,8 @@ export async function POST(req: NextRequest) {
 
     // Build the complete payload for the external webhook
     const webhookPayload = {
-      ...body, // Includes workflow_id, name, description, nodes, base_url, user_id
+      ...body, // Includes workflow_id, name, description, nodes, user_id
+      base_url: profile.n8n_base_url, // Use n8n base URL from database
       api_keys,
       main_provider: settings.main_provider || 'anthropic',
       fallback_provider: settings.fallback_provider || null,
