@@ -130,6 +130,7 @@ export interface Database {
           company_or_project: string | null
           usage_intent: string | null
           marketing_source: string | null
+          n8n_base_url: string | null
           created_at: string
           updated_at: string
         }
@@ -139,6 +140,7 @@ export interface Database {
           company_or_project?: string | null
           usage_intent?: string | null
           marketing_source?: string | null
+          n8n_base_url?: string | null
           created_at?: string
           updated_at?: string
         }
@@ -148,6 +150,7 @@ export interface Database {
           company_or_project?: string | null
           usage_intent?: string | null
           marketing_source?: string | null
+          n8n_base_url?: string | null
           created_at?: string
           updated_at?: string
         }

@@ -31,6 +31,7 @@ interface WorkflowRow {
 export default function Dashboard() {
   const { loading, user } = useProtectedRoute();
 
+  const [firstName, setFirstName] = useState<string>("");
   const [plan, setPlan] = useState<string>("-");
   const [usage, setUsage] = useState<number>(0);
   const [totalWorkflows, setTotalWorkflows] = useState<number>(0);
@@ -54,15 +55,24 @@ export default function Dashboard() {
     if (!user) return;
 
     const fetchStats = async () => {
-      const { data: userRow } = await supabase
+      const { data: userRow, error: userError } = await supabase
         .from("users")
-        .select("plan, usage_count")
+        .select("first_name, plan, usage_count")
         .eq("id", user.id)
         .single();
 
-      if (userRow) {
+      if (userRow && !userError) {
+        setFirstName(userRow.first_name || "");
         setPlan(userRow.plan ?? "-");
         setUsage(userRow.usage_count ?? 0);
+      }
+
+      // If no first name found in users table, try auth metadata
+      if (!userRow?.first_name || userError) {
+        const { data: authUser } = await supabase.auth.getUser();
+        if (authUser.user?.user_metadata?.first_name) {
+          setFirstName(authUser.user.user_metadata.first_name);
+        }
       }
 
       // total workflows count
@@ -135,11 +145,6 @@ export default function Dashboard() {
           nodes,
           base_url: baseUrl,
           user_id: user.id,
-          email: user.email,
-          api_keys: {
-            openrouter: (user.user_metadata as any)?.openrouter_key ?? process.env.OPENROUTER_API_KEY ?? null,
-            anthropic: (user.user_metadata as any)?.anthropic_key ?? process.env.ANTHROPIC_API_KEY ?? null,
-          },
         }),
       });
 
@@ -231,7 +236,9 @@ export default function Dashboard() {
       {/* Header */}
       <div className="flex justify-between items-start flex-col md:flex-row md:items-center gap-4">
         <div>
-          <h1 className="text-4xl font-bold mb-2">Welcome back, {user.first_name}!</h1>
+          <h1 className="text-4xl font-bold mb-2">
+            Welcome back{firstName ? `, ${firstName}` : ""}!
+          </h1>
           <p className="text-gray-400">Ready to generate some amazing n8n workflows?</p>
         </div>
       </div>
@@ -264,14 +271,14 @@ export default function Dashboard() {
             rows={4}
             value={description}
             onChange={(e) => setDescription(e.target.value)}
-            placeholder="Description"
+            placeholder="Generate me a workflow that ..."
             className="bg-transparent border border-border rounded-2xl px-4 py-2 focus:border-highlight outline-none input-hover resize-none"
           />
           <input
             type="text"
             value={nodes}
             onChange={(e) => setNodes(e.target.value)}
-            placeholder="Suggested nodes/services (optional)"
+            placeholder="Suggested nodes (optional)"
             className="bg-transparent border border-border rounded-2xl px-4 py-2 focus:border-highlight outline-none input-hover"
           />
           <input

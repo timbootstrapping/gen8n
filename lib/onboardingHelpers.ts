@@ -7,6 +7,7 @@ export interface OnboardingData {
   email: string;
   companyOrProject: string;
   usageIntent: string;
+  n8nBaseUrl: string;
   mainProvider: string;
   fallbackProvider?: string;
   apiKeys: Record<string, string>;
@@ -19,7 +20,8 @@ export async function saveOnboardingProfile(userId: string, data: Partial<Onboar
     user_id: userId,
     company_or_project: data.companyOrProject || null,
     usage_intent: data.usageIntent || null,
-    marketing_source: data.marketingSource || null
+    marketing_source: data.marketingSource || null,
+    n8n_base_url: data.n8nBaseUrl || null
   };
 
   const { error } = await supabase

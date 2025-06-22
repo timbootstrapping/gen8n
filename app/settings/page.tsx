@@ -5,6 +5,8 @@ import { useEffect, useState } from 'react';
 import { supabase } from '@/lib/supabaseClient';
 import { Button } from '@/components/ui/Button';
 import { User, Settings } from '@/types/database';
+import Link from 'next/link';
+import { ArrowLeft } from 'lucide-react';
 
 // Provider configurations
 const API_PROVIDERS = [
@@ -28,6 +30,7 @@ export default function SettingsPage() {
   // Profile state
   const [firstName, setFirstName] = useState('');
   const [lastName, setLastName] = useState('');
+  const [n8nBaseUrl, setN8nBaseUrl] = useState('');
   const [profileMsg, setProfileMsg] = useState('');
   const [profileLoading, setProfileLoading] = useState(false);
 
@@ -63,17 +66,37 @@ export default function SettingsPage() {
     
     const loadUserData = async () => {
       // Load profile data
-      const { data: userData } = await supabase
+      const { data: userData, error: userError } = await supabase
         .from('users')
         .select('first_name, last_name, plan, usage_count')
         .eq('id', user.id)
         .single();
       
-      if (userData) {
+      if (userData && !userError) {
         setFirstName(userData.first_name || '');
         setLastName(userData.last_name || '');
         setPlan(userData.plan || 'free');
         setUsage(userData.usage_count || 0);
+      }
+      
+      // If no user data found, try to get it from auth metadata
+      if (!userData || userError) {
+        const { data: authUser } = await supabase.auth.getUser();
+        if (authUser.user?.user_metadata) {
+          setFirstName(authUser.user.user_metadata.first_name || '');
+          setLastName(authUser.user.user_metadata.last_name || '');
+        }
+      }
+
+      // Load additional profile data from profile table
+      const { data: profileData } = await supabase
+        .from('profile')
+        .select('n8n_base_url')
+        .eq('user_id', user.id)
+        .single();
+      
+      if (profileData) {
+        setN8nBaseUrl(profileData.n8n_base_url || '');
       }
 
       // Load settings data (API keys and preferred provider)
@@ -136,7 +159,8 @@ export default function SettingsPage() {
     if (!user) return;
     setProfileLoading(true);
     
-    const { error } = await supabase
+    // Update users table
+    const { error: userError } = await supabase
       .from('users')
       .update({ 
         first_name: firstName.trim() || null, 
@@ -144,6 +168,15 @@ export default function SettingsPage() {
       })
       .eq('id', user.id);
     
+    // Update profile table for n8n base URL
+    const { error: profileError } = await supabase
+      .from('profile')
+      .upsert({
+        user_id: user.id,
+        n8n_base_url: n8nBaseUrl.trim() || null
+      });
+    
+    const error = userError || profileError;
     setProfileMsg(error ? error.message : 'Profile updated successfully!');
     setProfileLoading(false);
     
@@ -286,6 +319,17 @@ export default function SettingsPage() {
 
   return (
     <div className="max-w-[1200px] mx-auto px-4 sm:px-8 py-6 space-y-8">
+      {/* Back Navigation */}
+      <div className="mb-8">
+        <Link 
+          href="/dashboard" 
+          className="inline-flex items-center gap-2 text-foreground/70 hover:text-foreground nav-hover"
+        >
+          <ArrowLeft size={16} />
+          Back to Dashboard
+        </Link>
+      </div>
+
       <h1 className="text-3xl font-bold mb-8">Settings</h1>
 
       {/* Profile Section */}
@@ -313,6 +357,20 @@ export default function SettingsPage() {
               className="w-full bg-[#1a1a1d] border border-border rounded-xl px-4 py-3 input-hover focus:border-highlight outline-none"
             />
           </div>
+        </div>
+        
+        <div>
+          <label className="block text-sm font-medium mb-2">n8n Base URL</label>
+          <input
+            type="url"
+            value={n8nBaseUrl}
+            onChange={(e) => setN8nBaseUrl(e.target.value)}
+            placeholder="https://your-n8n.app.n8n.cloud/"
+            className="w-full bg-[#1a1a1d] border border-border rounded-xl px-4 py-3 input-hover focus:border-highlight outline-none"
+          />
+          <p className="text-xs text-gray-400 mt-1">
+            Your n8n instance URL where workflows will be generated and managed.
+          </p>
         </div>
         
         <div>

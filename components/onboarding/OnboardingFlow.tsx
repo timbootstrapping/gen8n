@@ -319,6 +319,17 @@ export default function OnboardingFlow({ initialUser }: OnboardingFlowProps) {
               </div>
             </div>
             
+            <input
+              type="url"
+              value={data.n8nBaseUrl || ''}
+              onChange={(e) => updateData({ n8nBaseUrl: e.target.value })}
+              placeholder="n8n Base URL (e.g. https://your-n8n.app.n8n.cloud/)"
+              className="w-full bg-transparent border border-border rounded-2xl px-4 py-2 input-hover focus:border-highlight outline-none"
+            />
+            <p className="text-xs text-gray-400 mt-1">
+              This is your n8n instance URL where workflows will be generated. You can change this later in settings.
+            </p>
+            
             <div className="flex gap-2 pt-4">
               <Button onClick={prevStep} className="flex-1" intent="secondary">
                 Back
