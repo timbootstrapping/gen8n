@@ -13,7 +13,10 @@ import {
   saveOnboardingSettings, 
   saveOnboardingToStorage, 
   loadOnboardingFromStorage, 
-  clearOnboardingStorage 
+  clearOnboardingStorage,
+  saveCurrentStep,
+  loadCurrentStep,
+  checkOnboardingStatus
 } from '@/lib/onboardingHelpers';
 
 interface OnboardingFlowProps {
@@ -52,18 +55,51 @@ export default function OnboardingFlow({ initialUser }: OnboardingFlowProps) {
   const [data, setData] = useState<Partial<OnboardingData>>({});
   const [keyValidations, setKeyValidations] = useState<Record<string, boolean>>({});
   const [otherSource, setOtherSource] = useState('');
+  const [isReturningUser, setIsReturningUser] = useState(false);
+  const [consentGiven, setConsentGiven] = useState(false);
 
-  // Load from storage on mount
+  // Load from storage on mount and handle step persistence
   useEffect(() => {
-    const stored = loadOnboardingFromStorage();
-    if (Object.keys(stored).length > 0) {
-      setData(stored);
-      // If user is already authenticated and has some data, skip to step 2
-      if (initialUser && stored.firstName) {
-        setCurrentStep(2);
+    const initializeOnboarding = async () => {
+      const stored = loadOnboardingFromStorage();
+      const savedStep = loadCurrentStep();
+      
+      if (Object.keys(stored).length > 0) {
+        setData(stored);
+        
+        // Extract marketing source if it starts with "Other:"
+        if (stored.marketingSource?.startsWith('Other:')) {
+          setOtherSource(stored.marketingSource.replace('Other: ', ''));
+        }
       }
-    }
-  }, [initialUser]);
+
+      // Check if user is authenticated and handle step restoration
+      if (initialUser) {
+        setIsReturningUser(true);
+        
+        // Check if they've already completed onboarding
+        const hasCompleted = await checkOnboardingStatus(initialUser.id);
+        if (hasCompleted) {
+          router.push('/dashboard');
+          return;
+        }
+        
+        // Restore saved step or skip step 1 if they have data
+        if (savedStep && savedStep > 1) {
+          setCurrentStep(savedStep);
+        } else if (stored.firstName || stored.email) {
+          setCurrentStep(2); // Skip account creation if they already have data
+        }
+      } else {
+        // Not authenticated, start from step 1 or restore saved step
+        if (savedStep) {
+          setCurrentStep(Math.min(savedStep, 1)); // Cap at step 1 if not authenticated
+        }
+      }
+    };
+
+    initializeOnboarding();
+  }, [initialUser, router]);
 
   // Save to storage whenever data changes
   useEffect(() => {
@@ -78,13 +114,17 @@ export default function OnboardingFlow({ initialUser }: OnboardingFlowProps) {
 
   const nextStep = () => {
     if (currentStep < 6) {
-      setCurrentStep(prev => prev + 1);
+      const newStep = currentStep + 1;
+      setCurrentStep(newStep);
+      saveCurrentStep(newStep);
     }
   };
 
   const prevStep = () => {
     if (currentStep > 1) {
-      setCurrentStep(prev => prev - 1);
+      const newStep = currentStep - 1;
+      setCurrentStep(newStep);
+      saveCurrentStep(newStep);
     }
   };
 
@@ -109,6 +149,7 @@ export default function OnboardingFlow({ initialUser }: OnboardingFlowProps) {
           lastName: data.lastName!,
           email: data.email!
         });
+        setIsReturningUser(true);
         nextStep();
       }
     } catch (error: any) {
@@ -155,6 +196,41 @@ export default function OnboardingFlow({ initialUser }: OnboardingFlowProps) {
   const renderStep = () => {
     switch (currentStep) {
       case 1: // Account Creation
+        // If user is already authenticated, show continue message
+        if (isReturningUser && initialUser) {
+          return (
+            <div className="space-y-4 text-center">
+              <h1 className="text-3xl font-bold mb-6">👋 Welcome Back!</h1>
+              <div className="bg-surface border border-border rounded-2xl p-6 space-y-4">
+                <p className="text-lg">You're already signed in as:</p>
+                <p className="text-highlight font-medium">{initialUser.email}</p>
+                <p className="text-sm text-gray-400">Let's continue your onboarding!</p>
+              </div>
+              
+              <div className="flex gap-2 pt-4">
+                <Button 
+                  onClick={() => {
+                    clearOnboardingStorage();
+                    setCurrentStep(1);
+                    setIsReturningUser(false);
+                    setData({});
+                  }} 
+                  className="flex-1" 
+                  intent="secondary"
+                >
+                  Reset Onboarding
+                </Button>
+                <Button 
+                  onClick={nextStep} 
+                  className="flex-1 hover-unified"
+                >
+                  Continue Onboarding
+                </Button>
+              </div>
+            </div>
+          );
+        }
+
         return (
           <form onSubmit={handleAccountCreation} className="space-y-4">
             <h1 className="text-3xl font-bold text-center mb-6">Create Your Gen8n Account</h1>
@@ -222,19 +298,26 @@ export default function OnboardingFlow({ initialUser }: OnboardingFlowProps) {
               className="w-full bg-transparent border border-border rounded-2xl px-4 py-2 input-hover focus:border-highlight outline-none"
             />
             
-            <select
-              value={data.usageIntent || ''}
-              onChange={(e) => updateData({ usageIntent: e.target.value })}
-              required
-              className="w-full bg-transparent border border-border rounded-2xl px-4 py-2 input-hover focus:border-highlight outline-none"
-            >
-              <option value="" disabled>Select Usage Intent</option>
-              {usageIntents.map(intent => (
-                <option key={intent} value={intent} className="bg-[#1a1a1d]">
-                  {intent}
-                </option>
-              ))}
-            </select>
+            <div className="relative">
+              <select
+                value={data.usageIntent || ''}
+                onChange={(e) => updateData({ usageIntent: e.target.value })}
+                required
+                className="w-full bg-[#1a1a1d] border border-border rounded-2xl px-4 py-2 pr-10 input-hover focus:border-highlight outline-none appearance-none cursor-pointer text-white"
+              >
+                <option value="" disabled className="bg-[#1a1a1d] text-gray-400">Select Usage Intent</option>
+                {usageIntents.map(intent => (
+                  <option key={intent} value={intent} className="bg-[#1a1a1d] text-white">
+                    {intent}
+                  </option>
+                ))}
+              </select>
+              <div className="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none">
+                <svg className="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                </svg>
+              </div>
+            </div>
             
             <div className="flex gap-2 pt-4">
               <Button onClick={prevStep} className="flex-1" intent="secondary">
@@ -259,19 +342,26 @@ export default function OnboardingFlow({ initialUser }: OnboardingFlowProps) {
             
             <div className="space-y-4">
               <label className="block text-sm font-medium">Main Provider *</label>
-              <select
-                value={data.mainProvider || ''}
-                onChange={(e) => updateData({ mainProvider: e.target.value })}
-                required
-                className="w-full bg-transparent border border-border rounded-2xl px-4 py-2 input-hover focus:border-highlight outline-none"
-              >
-                <option value="" disabled>Select Provider</option>
-                {providers.map(provider => (
-                  <option key={provider.value} value={provider.value} className="bg-[#1a1a1d]">
-                    {provider.label}
-                  </option>
-                ))}
-              </select>
+              <div className="relative">
+                <select
+                  value={data.mainProvider || ''}
+                  onChange={(e) => updateData({ mainProvider: e.target.value })}
+                  required
+                  className="w-full bg-[#1a1a1d] border border-border rounded-2xl px-4 py-2 pr-10 input-hover focus:border-highlight outline-none appearance-none cursor-pointer text-white"
+                >
+                  <option value="" disabled className="bg-[#1a1a1d] text-gray-400">Select Provider</option>
+                  {providers.map(provider => (
+                    <option key={provider.value} value={provider.value} className="bg-[#1a1a1d] text-white">
+                      {provider.label}
+                    </option>
+                  ))}
+                </select>
+                <div className="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none">
+                  <svg className="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                  </svg>
+                </div>
+              </div>
               
               {data.mainProvider && (
                 <p className="text-sm text-gray-400">
@@ -280,18 +370,25 @@ export default function OnboardingFlow({ initialUser }: OnboardingFlowProps) {
               )}
               
               <label className="block text-sm font-medium mt-6">Fallback Provider (optional)</label>
-              <select
-                value={data.fallbackProvider || ''}
-                onChange={(e) => updateData({ fallbackProvider: e.target.value })}
-                className="w-full bg-transparent border border-border rounded-2xl px-4 py-2 input-hover focus:border-highlight outline-none"
-              >
-                <option value="">None</option>
-                {providers.map(provider => (
-                  <option key={provider.value} value={provider.value} className="bg-[#1a1a1d]">
-                    {provider.label}
-                  </option>
-                ))}
-              </select>
+              <div className="relative">
+                <select
+                  value={data.fallbackProvider || ''}
+                  onChange={(e) => updateData({ fallbackProvider: e.target.value })}
+                  className="w-full bg-[#1a1a1d] border border-border rounded-2xl px-4 py-2 pr-10 input-hover focus:border-highlight outline-none appearance-none cursor-pointer text-white"
+                >
+                  <option value="" className="bg-[#1a1a1d] text-gray-400">None</option>
+                  {providers.map(provider => (
+                    <option key={provider.value} value={provider.value} className="bg-[#1a1a1d] text-white">
+                      {provider.label}
+                    </option>
+                  ))}
+                </select>
+                <div className="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none">
+                  <svg className="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                  </svg>
+                </div>
+              </div>
             </div>
             
             <div className="flex gap-2 pt-4">
@@ -351,14 +448,31 @@ export default function OnboardingFlow({ initialUser }: OnboardingFlowProps) {
                 />
               )}
               
-              <div className="flex items-center gap-2 mt-6 p-4 bg-[#1a1a1d] rounded-2xl">
-                <input 
-                  type="checkbox" 
-                  id="skip"
-                  checked={data.skippedKeys || false}
-                  onChange={(e) => updateData({ skippedKeys: e.target.checked })}
-                />
-                <label htmlFor="skip" className="text-sm">
+              <div className="flex items-center gap-3 mt-6 p-4 bg-[#1a1a1d] rounded-2xl">
+                <div className="relative">
+                  <input 
+                    type="checkbox" 
+                    id="skip"
+                    checked={data.skippedKeys || false}
+                    onChange={(e) => updateData({ skippedKeys: e.target.checked })}
+                    className="sr-only"
+                  />
+                  <label 
+                    htmlFor="skip" 
+                    className={`w-5 h-5 rounded border-2 flex items-center justify-center cursor-pointer transition-all duration-200 ${
+                      data.skippedKeys 
+                        ? 'bg-highlight border-highlight' 
+                        : 'border-gray-400 hover:border-highlight'
+                    }`}
+                  >
+                    {data.skippedKeys && (
+                      <svg className="w-3 h-3 text-white" fill="currentColor" viewBox="0 0 20 20">
+                        <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
+                      </svg>
+                    )}
+                  </label>
+                </div>
+                <label htmlFor="skip" className="text-sm cursor-pointer">
                   Skip and try a free demo (2 runs)
                 </label>
               </div>
@@ -384,32 +498,57 @@ export default function OnboardingFlow({ initialUser }: OnboardingFlowProps) {
           <div className="space-y-4">
             <h1 className="text-3xl font-bold text-center mb-6">Where did you hear about Gen8n?</h1>
             
-            <select
-              value={data.marketingSource || ''}
-              onChange={(e) => updateData({ marketingSource: e.target.value })}
-              required
-              className="w-full bg-transparent border border-border rounded-2xl px-4 py-2 input-hover focus:border-highlight outline-none"
-            >
-              <option value="" disabled>Select Source</option>
-              {marketingSources.map(source => (
-                <option key={source} value={source} className="bg-[#1a1a1d]">
-                  {source}
-                </option>
-              ))}
-            </select>
-            
-            {data.marketingSource === 'Other' && (
-              <input
-                type="text"
-                value={otherSource}
+            <div className="relative">
+              <select
+                value={data.marketingSource?.startsWith('Other:') ? 'Other' : (data.marketingSource || '')}
                 onChange={(e) => {
-                  setOtherSource(e.target.value);
-                  updateData({ marketingSource: `Other: ${e.target.value}` });
+                  const value = e.target.value;
+                  if (value === 'Other') {
+                    // When selecting "Other", don't immediately update the data
+                    // Just trigger the input field to show
+                    updateData({ marketingSource: 'Other' });
+                    setOtherSource(''); // Reset the other source input
+                  } else {
+                    // For other selections, update normally and clear other source
+                    updateData({ marketingSource: value });
+                    setOtherSource('');
+                  }
                 }}
-                placeholder="Please specify"
                 required
-                className="w-full bg-transparent border border-border rounded-2xl px-4 py-2 input-hover focus:border-highlight outline-none"
-              />
+                className="w-full bg-[#1a1a1d] border border-border rounded-2xl px-4 py-2 pr-10 input-hover focus:border-highlight outline-none appearance-none cursor-pointer text-white"
+              >
+                <option value="" disabled className="bg-[#1a1a1d] text-gray-400">Select Source</option>
+                {marketingSources.map(source => (
+                  <option key={source} value={source} className="bg-[#1a1a1d] text-white">
+                    {source}
+                  </option>
+                ))}
+              </select>
+              <div className="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none">
+                <svg className="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                </svg>
+              </div>
+            </div>
+            
+            {(data.marketingSource === 'Other' || data.marketingSource?.startsWith('Other:')) && (
+              <div>
+                <input
+                  type="text"
+                  value={otherSource}
+                  onChange={(e) => {
+                    const value = e.target.value;
+                    setOtherSource(value);
+                    // Update the data with the combined format
+                    updateData({ marketingSource: value ? `Other: ${value}` : 'Other' });
+                  }}
+                  placeholder="Please specify"
+                  required
+                  className="w-full bg-transparent border border-border rounded-2xl px-4 py-2 input-hover focus:border-highlight outline-none"
+                  autoFocus
+                />
+                <p className="text-xs text-gray-500 mt-1">Please tell us where you discovered Gen8n</p>
+              </div>
             )}
             
             <div className="flex gap-2 pt-4">
@@ -419,7 +558,11 @@ export default function OnboardingFlow({ initialUser }: OnboardingFlowProps) {
               <Button 
                 onClick={nextStep} 
                 className="flex-1 hover-unified"
-                disabled={!data.marketingSource}
+                disabled={
+                  !data.marketingSource || 
+                  (data.marketingSource === 'Other' && !otherSource.trim()) ||
+                  (data.marketingSource?.startsWith('Other:') && !otherSource.trim())
+                }
               >
                 Next
               </Button>
@@ -465,9 +608,31 @@ export default function OnboardingFlow({ initialUser }: OnboardingFlowProps) {
               <strong>Note:</strong> Running generations using your keys may incur costs depending on your model provider (e.g. ~$0.30 per Claude Opus run).
             </div>
             
-            <div className="flex items-start gap-2">
-              <input type="checkbox" id="consent" required />
-              <label htmlFor="consent" className="text-sm">
+            <div className="flex items-start gap-3">
+              <div className="relative">
+                <input 
+                  type="checkbox" 
+                  id="consent" 
+                  checked={consentGiven}
+                  onChange={(e) => setConsentGiven(e.target.checked)}
+                  className="sr-only" 
+                />
+                <label 
+                  htmlFor="consent" 
+                  className={`w-5 h-5 rounded border-2 flex items-center justify-center cursor-pointer transition-all duration-200 ${
+                    consentGiven 
+                      ? 'bg-highlight border-highlight' 
+                      : 'border-gray-400 hover:border-highlight'
+                  }`}
+                >
+                  {consentGiven && (
+                    <svg className="w-3 h-3 text-white" fill="currentColor" viewBox="0 0 20 20">
+                      <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
+                    </svg>
+                  )}
+                </label>
+              </div>
+              <label htmlFor="consent" className="text-sm cursor-pointer">
                 I understand that my API key will be used to power generations.
               </label>
             </div>
@@ -479,7 +644,7 @@ export default function OnboardingFlow({ initialUser }: OnboardingFlowProps) {
               <Button 
                 onClick={finalizeOnboarding} 
                 className="flex-1 hover-unified"
-                disabled={loading}
+                disabled={loading || !consentGiven}
               >
                 {loading ? 'Setting up...' : 'Start Using Gen8n'}
               </Button>

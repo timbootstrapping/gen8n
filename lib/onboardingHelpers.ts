@@ -50,6 +50,7 @@ export async function saveOnboardingSettings(userId: string, data: Partial<Onboa
 
 // Local storage helpers for persistence
 const ONBOARDING_KEY = 'gen8n_onboarding_data';
+const ONBOARDING_STEP_KEY = 'gen8n_onboarding_step';
 
 export function saveOnboardingToStorage(data: Partial<OnboardingData>) {
   localStorage.setItem(ONBOARDING_KEY, JSON.stringify(data));
@@ -64,6 +65,36 @@ export function loadOnboardingFromStorage(): Partial<OnboardingData> {
   }
 }
 
+export function saveCurrentStep(step: number) {
+  localStorage.setItem(ONBOARDING_STEP_KEY, step.toString());
+}
+
+export function loadCurrentStep(): number | null {
+  try {
+    const stored = localStorage.getItem(ONBOARDING_STEP_KEY);
+    return stored ? parseInt(stored, 10) : null;
+  } catch {
+    return null;
+  }
+}
+
 export function clearOnboardingStorage() {
   localStorage.removeItem(ONBOARDING_KEY);
+  localStorage.removeItem(ONBOARDING_STEP_KEY);
+}
+
+// Check if user has completed onboarding
+export async function checkOnboardingStatus(userId: string): Promise<boolean> {
+  try {
+    const { data, error } = await supabase
+      .from('settings')
+      .select('onboarding_complete')
+      .eq('user_id', userId)
+      .single();
+    
+    if (error) return false;
+    return data?.onboarding_complete || false;
+  } catch {
+    return false;
+  }
 } 
