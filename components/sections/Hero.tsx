@@ -58,7 +58,7 @@ export default function Hero() {
             transition={{ duration: 0.6, delay: 0.4 }}
             className="flex flex-col sm:flex-row items-center justify-center gap-4 mb-12"
           >
-            <Link href="/generate">
+            <Link href="/signup">
               <Button intent="primary" size="lg" className="hero-primary-button">
                 Start Building
               </Button>

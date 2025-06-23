@@ -49,7 +49,7 @@ export default function LandingHeader() {
             Log in
           </Link>
           <Link href="/signup">
-            <Button intent="primary" size="sm" className="hover-unified">Sign up</Button>
+            <Button intent="primary" size="sm" className="hover-unified">Start for free</Button>
           </Link>
         </div>
 
