@@ -1,13 +1,25 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { Button } from '@/components/ui/Button';
 import HeroStarfield from '@/components/ui/HeroStarfield';
-import { ArrowLeft, Download, ExternalLink } from 'lucide-react';
+import { ArrowLeft, Download, ExternalLink, CreditCard, Key, AlertTriangle, Settings } from 'lucide-react';
 import Link from 'next/link';
+import { useProtectedRoute } from '@/lib/useProtectedRoute';
+import { getUserCreditBalance } from '@/lib/creditHelpers';
+
+interface CreditBalance {
+  credits: number;
+  reserved_credits: number;
+  use_own_api_keys: boolean;
+  has_required_api_keys: boolean;
+  main_provider: string | null;
+  fallback_provider: string | null;
+}
 
 export default function GeneratePage() {
+  const { loading: authLoading, user } = useProtectedRoute();
   const [prompt, setPrompt] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [result, setResult] = useState<{
@@ -16,10 +28,61 @@ export default function GeneratePage() {
     json: any;
   } | null>(null);
   const [error, setError] = useState('');
+  const [creditBalance, setCreditBalance] = useState<CreditBalance | null>(null);
+  const [balanceLoading, setBalanceLoading] = useState(true);
+
+  // Load credit balance
+  useEffect(() => {
+    if (!user) return;
+    
+    const loadBalance = async () => {
+      setBalanceLoading(true);
+      const balance = await getUserCreditBalance(user.id);
+      setCreditBalance(balance);
+      setBalanceLoading(false);
+    };
+
+    loadBalance();
+  }, [user]);
+
+  const availableCredits = creditBalance ? creditBalance.credits - creditBalance.reserved_credits : 0;
+
+  const canGenerate = creditBalance && (
+    (creditBalance.use_own_api_keys && creditBalance.has_required_api_keys) ||
+    (!creditBalance.use_own_api_keys && availableCredits > 0)
+  );
+
+  const getStatusMessage = () => {
+    if (!creditBalance) return '';
+    
+    if (creditBalance.use_own_api_keys) {
+      if (creditBalance.has_required_api_keys) {
+        return `Using your API keys (${creditBalance.main_provider} + ${creditBalance.fallback_provider}) • Unlimited generations`;
+      } else {
+        return 'Missing required API keys • Need both main and fallback providers in settings';
+      }
+    } else {
+      if (availableCredits > 0) {
+        const reservedText = creditBalance.reserved_credits > 0 
+          ? ` (${creditBalance.reserved_credits} reserved)`
+          : '';
+        return `${availableCredits} credit${availableCredits === 1 ? '' : 's'} available${reservedText}`;
+      } else {
+        return creditBalance.reserved_credits > 0
+          ? `${creditBalance.reserved_credits} credit${creditBalance.reserved_credits === 1 ? '' : 's'} reserved • Purchase more or add API keys`
+          : 'No credits available • Purchase credits or add API keys';
+      }
+    }
+  };
 
   const handleGenerate = async () => {
     if (!prompt.trim()) {
       setError('Please enter a workflow description');
+      return;
+    }
+
+    if (!canGenerate) {
+      setError('Cannot generate workflows. Please check your credit balance or API keys.');
       return;
     }
 
@@ -31,20 +94,30 @@ export default function GeneratePage() {
       const response = await fetch('/api/trigger-workflow', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ prompt: prompt.trim() })
+        body: JSON.stringify({ 
+          prompt: prompt.trim(),
+          user_id: user!.id,
+          workflow_id: `workflow_${Date.now()}`
+        })
       });
-
-      const data = await response.json();
 
       if (!response.ok) {
-        throw new Error(data.error || 'Failed to generate workflow');
+        const errorData = await response.json();
+        throw new Error(errorData.error || 'Failed to generate workflow');
       }
 
+      const data = await response.json();
       setResult({
-        id: data.workflowId,
+        id: data.workflowId || 'generated',
         name: data.name || 'Generated Workflow',
-        json: data.workflow
+        json: data.workflow || data
       });
+
+      // Refresh balance after successful generation
+      if (user) {
+        const newBalance = await getUserCreditBalance(user.id);
+        setCreditBalance(newBalance);
+      }
     } catch (err: any) {
       setError(err.message || 'An error occurred');
     } finally {
@@ -67,6 +140,19 @@ export default function GeneratePage() {
     document.body.removeChild(a);
     URL.revokeObjectURL(url);
   };
+
+  if (authLoading || balanceLoading) {
+    return (
+      <main className="min-h-screen relative overflow-hidden bg-background">
+        <div className="absolute inset-0 z-0">
+          <HeroStarfield />
+        </div>
+        <div className="relative z-10 min-h-screen flex items-center justify-center">
+          <div className="text-white">Loading...</div>
+        </div>
+      </main>
+    );
+  }
 
   return (
     <main className="min-h-screen relative overflow-hidden bg-background">
@@ -121,6 +207,43 @@ export default function GeneratePage() {
               </motion.p>
             </div>
 
+            {/* Status Banner */}
+            {creditBalance && (
+              <motion.div
+                initial={{ opacity: 0, y: -10 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.5, delay: 0.5 }}
+                className={`mb-6 p-4 rounded-2xl border ${
+                  canGenerate 
+                    ? 'bg-green-500/10 border-green-500/20 text-green-400'
+                    : 'bg-red-500/10 border-red-500/20 text-red-400'
+                }`}
+              >
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-3">
+                    {creditBalance.use_own_api_keys ? (
+                      <Key className="w-5 h-5" />
+                    ) : (
+                      <CreditCard className="w-5 h-5" />
+                    )}
+                    <span className="font-medium">{getStatusMessage()}</span>
+                  </div>
+                  
+                  {!canGenerate && (
+                    <Link href="/settings">
+                      <Button 
+                        size="sm" 
+                        className="bg-[#a259ff] hover:bg-[#9333ea]"
+                      >
+                        <Settings className="w-4 h-4 mr-2" />
+                        Fix in Settings
+                      </Button>
+                    </Link>
+                  )}
+                </div>
+              </motion.div>
+            )}
+
             {!result ? (
               /* Generation Form */
               <motion.div
@@ -146,16 +269,17 @@ export default function GeneratePage() {
                   <motion.div
                     initial={{ opacity: 0, scale: 0.95 }}
                     animate={{ opacity: 1, scale: 1 }}
-                    className="bg-red-500/10 border border-red-500/20 rounded-xl p-4 text-red-400"
+                    className="bg-red-500/10 border border-red-500/20 rounded-xl p-4 text-red-400 flex items-center gap-2"
                   >
-                    {error}
+                    <AlertTriangle className="w-5 h-5 flex-shrink-0" />
+                    <span>{error}</span>
                   </motion.div>
                 )}
 
                 <div className="flex flex-col sm:flex-row gap-4 justify-center">
                   <Button
                     onClick={handleGenerate}
-                    disabled={isLoading || !prompt.trim()}
+                    disabled={isLoading || !prompt.trim() || !canGenerate}
                     size="lg"
                     className="hover-unified"
                   >
@@ -172,6 +296,30 @@ export default function GeneratePage() {
                     </Button>
                   </Link>
                 </div>
+
+                {!canGenerate && (
+                  <div className="text-center">
+                    <p className="text-sm text-gray-400 mb-3">
+                      To generate workflows, you need either:
+                    </p>
+                    <div className="grid sm:grid-cols-2 gap-3 max-w-lg mx-auto">
+                      <div className="bg-surface/20 border border-border/30 rounded-lg p-3 text-sm">
+                        <div className="flex items-center gap-2 text-[#a259ff] font-medium mb-1">
+                          <CreditCard className="w-4 h-4" />
+                          Gen8n Credits
+                        </div>
+                        <p className="text-gray-400">Purchase credits for $1.50 per generation</p>
+                      </div>
+                      <div className="bg-surface/20 border border-border/30 rounded-lg p-3 text-sm">
+                        <div className="flex items-center gap-2 text-[#a259ff] font-medium mb-1">
+                          <Key className="w-4 h-4" />
+                          Your API Keys
+                        </div>
+                        <p className="text-gray-400">Use your own keys for unlimited generations</p>
+                      </div>
+                    </div>
+                  </div>
+                )}
               </motion.div>
             ) : (
               /* Results Display */
@@ -198,70 +346,36 @@ export default function GeneratePage() {
                     className="hover-unified"
                     size="lg"
                   >
-                    <Download size={16} className="mr-2" />
+                    <Download className="w-4 h-4 mr-2" />
                     Download JSON
                   </Button>
                   
-                  <Link href="/workflows">
-                    <Button
-                      intent="secondary"
-                      size="lg"
-                      className="hover-unified w-full sm:w-auto"
-                    >
-                      <ExternalLink size={16} className="mr-2" />
-                      View All Workflows
-                    </Button>
-                  </Link>
-
                   <Button
                     onClick={() => {
                       setResult(null);
                       setPrompt('');
                       setError('');
                     }}
-                    intent="ghost"
-                    size="lg"
+                    intent="secondary"
                     className="hover-unified"
+                    size="lg"
                   >
                     Generate Another
                   </Button>
+                  
+                  <Link href="/dashboard">
+                    <Button
+                      intent="secondary"
+                      size="lg"
+                      className="hover-unified w-full sm:w-auto"
+                    >
+                      <ExternalLink className="w-4 h-4 mr-2" />
+                      Dashboard
+                    </Button>
+                  </Link>
                 </div>
               </motion.div>
             )}
-          </motion.div>
-
-          {/* Feature Highlights */}
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.6, delay: 0.7 }}
-            className="mt-12 grid grid-cols-1 md:grid-cols-3 gap-6"
-          >
-            {[
-              {
-                title: "AI-Powered",
-                description: "Advanced AI analyzes your requirements and generates optimal workflows"
-              },
-              {
-                title: "Production-Ready", 
-                description: "Generated workflows are immediately usable in your n8n instance"
-              },
-              {
-                title: "No-Code Required",
-                description: "Describe in plain English - no technical knowledge needed"
-              }
-            ].map((feature, index) => (
-              <motion.div
-                key={feature.title}
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.4, delay: 0.8 + index * 0.1 }}
-                className="backdrop-blur-sm bg-surface/10 border border-border/30 rounded-xl p-6 text-center card-hover"
-              >
-                <h3 className="font-semibold text-foreground mb-2">{feature.title}</h3>
-                <p className="text-sm text-foreground/70">{feature.description}</p>
-              </motion.div>
-            ))}
           </motion.div>
         </div>
       </div>

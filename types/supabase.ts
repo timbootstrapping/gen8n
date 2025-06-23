@@ -22,6 +22,7 @@ export interface Database {
           first_name: string | null
           last_name: string | null
           credits: number | null
+          credits_remaining: number | null
           last_reset: string | null
           usage_history: Json | null
           reserved_credits: number | null
@@ -38,6 +39,7 @@ export interface Database {
           first_name?: string | null
           last_name?: string | null
           credits?: number | null
+          credits_remaining?: number | null
           last_reset?: string | null
           usage_history?: Json | null
           reserved_credits?: number | null
@@ -54,6 +56,7 @@ export interface Database {
           first_name?: string | null
           last_name?: string | null
           credits?: number | null
+          credits_remaining?: number | null
           last_reset?: string | null
           usage_history?: Json | null
           reserved_credits?: number | null
@@ -165,6 +168,11 @@ export interface Database {
           openai_key: string | null
           openrouter_key: string | null
           google_key: string | null
+          anthropic_key_name: string | null
+          openai_key_name: string | null
+          openrouter_key_name: string | null
+          google_key_name: string | null
+          use_own_api_keys: boolean
           onboarding_complete: boolean
           created_at: string
           updated_at: string
@@ -178,6 +186,11 @@ export interface Database {
           openai_key?: string | null
           openrouter_key?: string | null
           google_key?: string | null
+          anthropic_key_name?: string | null
+          openai_key_name?: string | null
+          openrouter_key_name?: string | null
+          google_key_name?: string | null
+          use_own_api_keys?: boolean
           onboarding_complete?: boolean
           created_at?: string
           updated_at?: string
@@ -191,9 +204,46 @@ export interface Database {
           openai_key?: string | null
           openrouter_key?: string | null
           google_key?: string | null
+          anthropic_key_name?: string | null
+          openai_key_name?: string | null
+          openrouter_key_name?: string | null
+          google_key_name?: string | null
+          use_own_api_keys?: boolean
           onboarding_complete?: boolean
           created_at?: string
           updated_at?: string
+        }
+      }
+      credit_transactions: {
+        Row: {
+          id: string
+          user_id: string
+          type: 'purchase' | 'usage' | 'refund' | 'bonus'
+          amount: number
+          description: string | null
+          workflow_id: string | null
+          stripe_payment_intent_id: string | null
+          created_at: string
+        }
+        Insert: {
+          id?: string
+          user_id: string
+          type: 'purchase' | 'usage' | 'refund' | 'bonus'
+          amount: number
+          description?: string | null
+          workflow_id?: string | null
+          stripe_payment_intent_id?: string | null
+          created_at?: string
+        }
+        Update: {
+          id?: string
+          user_id?: string
+          type?: 'purchase' | 'usage' | 'refund' | 'bonus'
+          amount?: number
+          description?: string | null
+          workflow_id?: string | null
+          stripe_payment_intent_id?: string | null
+          created_at?: string
         }
       }
     }
