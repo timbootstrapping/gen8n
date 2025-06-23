@@ -4,7 +4,7 @@ import Stripe from 'stripe';
 import { supabaseAdmin } from '@/lib/supabaseAdmin';
 
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
-  apiVersion: '2023-10-16',
+  apiVersion: '2025-05-28.basil',
 });
 
 const webhookSecret = process.env.STRIPE_WEBHOOK_SECRET!;
@@ -80,34 +80,17 @@ async function handleSuccessfulPayment(session: Stripe.Checkout.Session) {
     const totalCredits = creditQuantity + bonusCredits;
 
     // Add credits to user's account using the database function
-    const { data, error } = await supabaseAdmin.rpc('update_user_credits', {
+    const { data, error } = await supabaseAdmin.rpc('add_user_credits', {
       p_user_id: userId,
       p_amount: totalCredits,
       p_transaction_type: 'purchase',
-      p_description: `Purchased ${creditQuantity} credits${bonusCredits > 0 ? ` (+${bonusCredits} bonus)` : ''} via Stripe`
+      p_description: `Purchased ${creditQuantity} credits${bonusCredits > 0 ? ` (+${bonusCredits} bonus)` : ''}`,
+      p_stripe_payment_intent_id: session.payment_intent as string
     });
 
     if (error) {
       console.error('Error adding credits:', error);
       return;
-    }
-
-    // Update the transaction with Stripe payment intent ID
-    if (session.payment_intent) {
-      const { error: updateError } = await supabaseAdmin
-        .from('credit_transactions')
-        .update({ 
-          stripe_payment_intent_id: session.payment_intent as string 
-        })
-        .eq('user_id', userId)
-        .eq('type', 'purchase')
-        .eq('amount', totalCredits)
-        .order('created_at', { ascending: false })
-        .limit(1);
-
-      if (updateError) {
-        console.error('Error updating transaction with Stripe ID:', updateError);
-      }
     }
 
     console.log(`Successfully added ${totalCredits} credits to user ${userId}`);

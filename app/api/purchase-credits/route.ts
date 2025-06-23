@@ -1,17 +1,16 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { createRouteHandlerClient } from '@supabase/auth-helpers-nextjs';
-import { cookies } from 'next/headers';
+import { supabaseAdmin } from '@/lib/supabaseAdmin';
 import Stripe from 'stripe';
 
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
-  apiVersion: '2023-10-16',
+  apiVersion: '2025-05-28.basil',
 });
 
 const CREDIT_PRICE = 150; // $1.50 in cents
 
 export async function POST(req: NextRequest) {
   try {
-    const { quantity } = await req.json();
+    const { quantity, user_id } = await req.json();
 
     if (!quantity || quantity < 1 || quantity > 1000) {
       return NextResponse.json(
@@ -20,22 +19,18 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    // Get the authenticated user
-    const supabase = createRouteHandlerClient({ cookies });
-    const { data: { user }, error: authError } = await supabase.auth.getUser();
-
-    if (authError || !user) {
+    if (!user_id) {
       return NextResponse.json(
-        { error: 'Authentication required' },
+        { error: 'User ID required' },
         { status: 401 }
       );
     }
 
     // Get user info for Stripe metadata
-    const { data: userData } = await supabase
+    const { data: userData } = await supabaseAdmin
       .from('users')
       .select('email, first_name, last_name')
-      .eq('id', user.id)
+      .eq('id', user_id)
       .single();
 
     const amount = quantity * CREDIT_PRICE;
@@ -60,11 +55,11 @@ export async function POST(req: NextRequest) {
       success_url: `${req.nextUrl.origin}/settings?purchase=success`,
       cancel_url: `${req.nextUrl.origin}/settings?purchase=cancelled`,
       metadata: {
-        user_id: user.id,
+        user_id: user_id,
         credit_quantity: quantity.toString(),
-        user_email: userData?.email || user.email || '',
+        user_email: userData?.email || '',
       },
-      customer_email: userData?.email || user.email || undefined,
+      customer_email: userData?.email || undefined,
     });
 
     return NextResponse.json({ url: session.url });

@@ -332,12 +332,13 @@ export default function OnboardingFlow({ initialUser }: OnboardingFlowProps) {
                   key={provider.value}
                   provider={provider.value}
                   label={provider.label}
-                  description={provider.desc}
+                  placeholder={`Enter your ${provider.label} API key`}
                   required={provider.required}
                   value={data[`${provider.value}Key` as keyof OnboardingData] as string || ''}
-                  isValid={keyValidations[provider.value]}
-                  onChange={(value, isValid) => {
+                  onChange={(value) => {
                     updateData({ [`${provider.value}Key`]: value } as any);
+                  }}
+                  onValidation={(isValid) => {
                     setKeyValidations(prev => ({ ...prev, [provider.value]: isValid }));
                   }}
                 />
@@ -566,14 +567,6 @@ export default function OnboardingFlow({ initialUser }: OnboardingFlowProps) {
         <ProgressStepper 
           currentStep={currentStep} 
           totalSteps={6}
-          stepTitles={[
-            'Account',
-            'Usage Type',
-            'API Keys',
-            'Profile',
-            'Source',
-            'Complete'
-          ]}
         />
         
         <motion.div

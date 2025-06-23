@@ -218,12 +218,17 @@ export default function SettingsPage() {
 
   // Handle credit purchase
   const handlePurchaseCredits = async (quantity: number) => {
+    if (!user) return;
+    
     setPurchaseLoading(true);
     try {
       const response = await fetch('/api/purchase-credits', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ quantity })
+        body: JSON.stringify({ 
+          quantity,
+          user_id: user.id 
+        })
       });
 
       const data = await response.json();
