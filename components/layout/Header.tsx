@@ -7,10 +7,14 @@ import DashboardHeader from './DashboardHeader';
 // Define routes that should use the landing header
 const publicRoutes = [
   '/',
-  '/login',
-  '/signup',
   '/pricing',
   '/features'
+];
+
+// Define routes that should have no header (auth pages)
+const noHeaderRoutes = [
+  '/login',
+  '/signup'
 ];
 
 // Define routes that should use the dashboard header
@@ -25,6 +29,16 @@ const authenticatedRoutes = [
 
 export default function Header() {
   const pathname = usePathname();
+
+  // Check if current route should have no header (auth pages)
+  const isNoHeaderRoute = noHeaderRoutes.some(route => 
+    pathname.startsWith(route)
+  );
+
+  // Return null for auth pages to have clean full-screen experience
+  if (isNoHeaderRoute) {
+    return null;
+  }
 
   // Check if current route is an authenticated route
   const isDashboardRoute = authenticatedRoutes.some(route => 

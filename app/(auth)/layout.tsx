@@ -1,6 +1,4 @@
-import LoginForm from '@/components/auth/LoginForm';
-
-export default function LoginPage() {
+export default function AuthLayout({ children }: { children: React.ReactNode }) {
   return (
     <div className="min-h-screen bg-[#0e0e0e] flex items-center justify-center p-4">
       {/* Background decoration */}
@@ -9,10 +7,10 @@ export default function LoginPage() {
       {/* Subtle glow effect */}
       <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,rgba(162,89,255,0.15)_0%,transparent_50%)] pointer-events-none" />
       
-      {/* Login form container */}
+      {/* Content container */}
       <div className="relative w-full max-w-md mx-auto">
         <div className="bg-[#0e0e0e]/80 backdrop-blur-xl border border-[#2a2a2a] rounded-3xl p-8 shadow-2xl shadow-black/50">
-          <LoginForm />
+          {children}
         </div>
       </div>
     </div>
