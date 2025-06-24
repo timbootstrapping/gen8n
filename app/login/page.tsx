@@ -88,25 +88,25 @@ export default function LoginPage() {
             {/* Login Form */}
             <form onSubmit={handleLogin} className="space-y-6">
               <div>
-                <input
-                  type="email"
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
+        <input
+          type="email"
+          value={email}
+          onChange={(e) => setEmail(e.target.value)}
                   placeholder="Email address"
-                  required
+          required
                   className="w-full bg-[#1a1a1a] border border-[#2a2a2a] rounded-2xl px-4 py-3 text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-[#a259ff] focus:border-transparent transition-all duration-200 ease-in-out hover:border-[#3a3a3a]"
-                />
+        />
               </div>
 
               <div>
-                <input
-                  type="password"
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                  placeholder="Password"
-                  required
+        <input
+          type="password"
+          value={password}
+          onChange={(e) => setPassword(e.target.value)}
+          placeholder="Password"
+          required
                   className="w-full bg-[#1a1a1a] border border-[#2a2a2a] rounded-2xl px-4 py-3 text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-[#a259ff] focus:border-transparent transition-all duration-200 ease-in-out hover:border-[#3a3a3a]"
-                />
+        />
               </div>
 
               {/* Error Message */}
@@ -118,10 +118,10 @@ export default function LoginPage() {
 
               {/* Login Button */}
               <button 
-                type="submit" 
+          type="submit" 
                 className="w-full bg-[#a259ff] hover:bg-[#9333ea] text-white font-medium py-3 px-4 rounded-2xl transition-all duration-200 disabled:opacity-50"
                 disabled={loading || !email || !password}
-              >
+        >
                 {loading ? (
                   <div className="flex items-center justify-center gap-2">
                     <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin"></div>
@@ -178,10 +178,10 @@ export default function LoginPage() {
                     className="text-[#a259ff] hover:text-[#9333ea] font-medium transition-colors duration-200"
                   >
                     Sign up here
-                  </Link>
-                </p>
+          </Link>
+        </p>
               </div>
-            </form>
+      </form>
           </div>
         </div>
       </div>

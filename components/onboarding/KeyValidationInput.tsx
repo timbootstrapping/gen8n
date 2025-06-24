@@ -94,7 +94,7 @@ export default function KeyValidationInput({
     <div className="space-y-2">
       <div className="flex items-center gap-2">
         <label className="text-sm font-medium">
-          {label} {required && <span className="text-red-400">*</span>}
+          {label} {provider === 'anthropic' ? '(Recommended)' : required ? '(Required)' : ''}
         </label>
         {info && (
           <a

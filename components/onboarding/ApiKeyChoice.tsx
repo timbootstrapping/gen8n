@@ -70,7 +70,7 @@ export default function ApiKeyChoice({ onChoice, loading }: ApiKeyChoiceProps) {
                 </div>
                 <div className="flex items-center gap-2 text-sm text-gray-400">
                   <Check className="w-4 h-4 text-green-400" />
-                  <span>Buy more credits as needed ($1.50 per generation)</span>
+                  <span>Buy more credits as needed</span>
                 </div>
                 <div className="flex items-center gap-2 text-sm text-gray-400">
                   <Check className="w-4 h-4 text-green-400" />

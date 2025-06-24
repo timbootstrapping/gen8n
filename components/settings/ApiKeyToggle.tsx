@@ -96,7 +96,7 @@ export default function ApiKeyToggle({
               </div>
               <p className="text-sm text-gray-400">
                 {availableCredits > 0 
-                  ? `${availableCredits} credit${availableCredits === 1 ? '' : 's'} available • $1.50 per generation`
+                  ? `${availableCredits} credit${availableCredits === 1 ? '' : 's'} available • one consumed per generation`
                   : reservedCredits > 0
                     ? `${reservedCredits} credit${reservedCredits === 1 ? '' : 's'} reserved • ${credits} total`
                     : 'No credits available'

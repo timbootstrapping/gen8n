@@ -13,7 +13,7 @@ import { getUserCreditBalance, toggleApiKeyUsage } from '@/lib/creditHelpers';
 
 // Provider configurations
 const API_PROVIDERS = [
-  { value: 'anthropic', label: 'Anthropic (Claude)', desc: 'Most accurate for structured JSON', required: true },
+  { value: 'anthropic', label: 'Anthropic (Claude)', desc: 'Most accurate for structured JSON', required: false },
   { value: 'openai', label: 'OpenAI', desc: 'Widely supported, good performance', required: false },
   { value: 'openrouter', label: 'OpenRouter', desc: 'Gateway to multiple models', required: false },
   { value: 'google', label: 'Google', desc: 'PaLM / Gemini models', required: false }
@@ -327,8 +327,8 @@ export default function SettingsPage() {
     setPwLoading(false);
     
     if (!error) {
-      setNewPassword('');
-      setConfirmPassword('');
+    setNewPassword('');
+    setConfirmPassword('');
     }
     
     // Clear message after 3 seconds
@@ -465,7 +465,7 @@ export default function SettingsPage() {
             <ArrowLeft size={16} />
             Back to Dashboard
           </Link>
-          <h1 className="text-3xl font-bold">Settings</h1>
+      <h1 className="text-3xl font-bold">Settings</h1>
           <p className="text-gray-400 mt-2">Manage your account, API keys, and billing preferences.</p>
         </div>
 
@@ -571,13 +571,8 @@ export default function SettingsPage() {
                         <div className="flex items-center gap-3 mb-2">
                           <h4 className="font-medium">{key.name}</h4>
                           <span className="px-2 py-1 bg-[#2a2a2a] text-xs rounded-full">
-                            {API_PROVIDERS.find(p => p.value === key.provider)?.label || key.provider}
+                            {API_PROVIDERS.find(p => p.value === key.provider)?.label || key.provider} {API_PROVIDERS.find(p => p.value === key.provider)?.value === 'anthropic' ? '(Recommended)' : API_PROVIDERS.find(p => p.value === key.provider)?.required ? '(Required)' : ''}
                           </span>
-                          {key.provider === 'anthropic' && (
-                            <span className="px-2 py-1 bg-red-500/20 text-red-400 text-xs rounded-full">
-                              Required
-                            </span>
-                          )}
                         </div>
                         <div className="text-sm text-gray-400 font-mono">
                           {visibleKeys.has(key.id) ? key.key : key.masked}
@@ -692,20 +687,20 @@ export default function SettingsPage() {
               <div className="grid gap-4 mb-6">
                 <div>
                   <label className="block text-sm font-medium mb-2">New Password</label>
-                  <input
-                    type="password"
-                    value={newPassword}
-                    onChange={(e) => setNewPassword(e.target.value)}
+        <input
+          type="password"
+          value={newPassword}
+          onChange={(e) => setNewPassword(e.target.value)}
                     className="w-full bg-[#2a2a2a] border border-[#3a3a3a] rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-[#a259ff]"
                     placeholder="Enter new password"
-                  />
+        />
                 </div>
                 <div>
                   <label className="block text-sm font-medium mb-2">Confirm Password</label>
-                  <input
-                    type="password"
-                    value={confirmPassword}
-                    onChange={(e) => setConfirmPassword(e.target.value)}
+        <input
+          type="password"
+          value={confirmPassword}
+          onChange={(e) => setConfirmPassword(e.target.value)}
                     className="w-full bg-[#2a2a2a] border border-[#3a3a3a] rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-[#a259ff]"
                     placeholder="Confirm new password"
                   />
@@ -745,7 +740,7 @@ export default function SettingsPage() {
                   <option value="">Select provider</option>
                   {API_PROVIDERS.map(provider => (
                     <option key={provider.value} value={provider.value}>
-                      {provider.label} {provider.required ? '(Required)' : ''}
+                      {provider.label} {provider.value === 'anthropic' ? '(Recommended)' : provider.required ? '(Required)' : ''}
                     </option>
                   ))}
                 </select>
@@ -753,8 +748,8 @@ export default function SettingsPage() {
               
               <div>
                 <label className="block text-sm font-medium mb-2">Key Name</label>
-                <input
-                  type="text"
+        <input
+          type="text"
                   value={newKeyLabel}
                   onChange={(e) => setNewKeyLabel(e.target.value)}
                   className="w-full bg-[#2a2a2a] border border-[#3a3a3a] rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-[#a259ff]"
@@ -764,7 +759,7 @@ export default function SettingsPage() {
               
               <div>
                 <label className="block text-sm font-medium mb-2">API Key</label>
-                <input
+        <input
                   type="password"
                   value={newKeyValue}
                   onChange={(e) => setNewKeyValue(e.target.value)}
@@ -789,10 +784,10 @@ export default function SettingsPage() {
                 disabled={modalLoading || !newKeyProvider || !newKeyValue.trim() || !newKeyLabel.trim()}
               >
                 {modalLoading ? 'Adding...' : 'Add Key'}
-              </Button>
+        </Button>
             </div>
           </div>
-        </div>
+    </div>
       )}
 
       {/* Credit Purchase Modal */}

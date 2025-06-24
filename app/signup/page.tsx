@@ -3,7 +3,7 @@
 import { useEffect, useState } from 'react';
 import { supabase } from '@/lib/supabaseClient';
 import OnboardingFlow from '@/components/onboarding/OnboardingFlow';
-// import SignUpForm from '@/components/auth/SignUpForm';
+import SignUpForm from '@/components/auth/SignUpForm';
 import Link from 'next/link';
 import { ArrowLeft } from 'lucide-react';
 
@@ -21,8 +21,8 @@ export default function SignUpPage() {
       // If user exists and we're on signup page, show onboarding
       if (user) {
         setShowOnboarding(true);
-      }
-    };
+    }
+  };
     checkUser();
 
     const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
@@ -69,16 +69,13 @@ export default function SignUpPage() {
         >
           <ArrowLeft size={16} />
           Back to Website
-        </Link>
+          </Link>
       </div>
       
       {/* Signup form container */}
       <div className="relative w-full max-w-md mx-auto">
         <div className="bg-[#0e0e0e]/80 backdrop-blur-xl border border-[#2a2a2a] rounded-3xl p-8 shadow-2xl shadow-black/50">
-          <div className="text-center">
-            <h1 className="text-2xl font-bold text-white mb-4">Create Account</h1>
-            <p className="text-gray-400">Sign up functionality will be restored once login is working</p>
-          </div>
+          <SignUpForm />
         </div>
       </div>
     </div>

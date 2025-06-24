@@ -26,7 +26,7 @@ interface OnboardingFlowProps {
 }
 
 const providers = [
-  { value: 'anthropic', label: 'Anthropic (Claude)', desc: 'Most accurate for structured JSON', required: true },
+  { value: 'anthropic', label: 'Anthropic (Claude)', desc: 'Most accurate for structured JSON', required: false },
   { value: 'openai', label: 'OpenAI', desc: 'Widely supported, OK output', required: false },
   { value: 'openrouter', label: 'OpenRouter', desc: 'Bring your own gateway', required: false },
   { value: 'google', label: 'Google', desc: 'PaLM / Gemini models', required: false }
