@@ -3,6 +3,8 @@
 interface ProgressStepperProps {
   currentStep: number;
   totalSteps: number;
+  onStepClick?: (step: number) => void;
+  canJumpToStep?: (step: number) => boolean;
 }
 
 const stepLabels = [
@@ -14,7 +16,7 @@ const stepLabels = [
   'Confirm'
 ];
 
-export default function ProgressStepper({ currentStep, totalSteps }: ProgressStepperProps) {
+export default function ProgressStepper({ currentStep, totalSteps, onStepClick, canJumpToStep }: ProgressStepperProps) {
   return (
     <div className="w-full mb-8">
       <div className="flex items-center justify-center gap-4 mb-4">
@@ -22,6 +24,7 @@ export default function ProgressStepper({ currentStep, totalSteps }: ProgressSte
           const stepNumber = i + 1;
           const isActive = stepNumber === currentStep;
           const isCompleted = stepNumber < currentStep;
+          const isClickable = onStepClick && canJumpToStep ? canJumpToStep(stepNumber) : false;
           
           const baseClasses = 'w-8 h-8 flex items-center justify-center rounded-full border text-sm font-medium transition-all duration-200';
           const classes = isActive
@@ -33,7 +36,15 @@ export default function ProgressStepper({ currentStep, totalSteps }: ProgressSte
           return (
             <div key={stepNumber} className="flex items-center gap-2">
               {i !== 0 && <div className="w-8 h-px bg-border" />}
-              <div className={classes}>{stepNumber}</div>
+              <button
+                type="button"
+                className={classes + (isClickable ? ' cursor-pointer hover:scale-105' : ' cursor-default')}
+                onClick={() => isClickable && onStepClick && onStepClick(stepNumber)}
+                disabled={!isClickable}
+                aria-label={`Go to step ${stepNumber}`}
+              >
+                {stepNumber}
+              </button>
             </div>
           );
         })}

@@ -43,6 +43,8 @@ export default function SignUpForm() {
       if (error) {
         setError(error.message);
       } else if (data.user) {
+        // Create settings row with onboarding_complete: false
+        await supabase.from('settings').upsert({ user_id: data.user.id, onboarding_complete: false });
         setSuccess(true);
         // Redirect to onboarding after a short delay
         setTimeout(() => {

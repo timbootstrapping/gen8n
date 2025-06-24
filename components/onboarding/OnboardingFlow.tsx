@@ -185,9 +185,16 @@ export default function OnboardingFlow({ initialUser }: OnboardingFlowProps) {
         // Go to API key setup
         nextStep();
       } else {
-        // Set preference to use Gen8n credits and initialize with 2 free credits
+        // Set preference to use Gen8n credits and initialize with 2 free credits if user has 0 credits
         await toggleApiKeyUsage(user.id, false);
-        await initializeUserCredits(user.id);
+        const { data: userData } = await supabase
+          .from('users')
+          .select('credits')
+          .eq('id', user.id)
+          .single();
+        if (!userData || !userData.credits || userData.credits === 0) {
+          await initializeUserCredits(user.id);
+        }
         // Skip API key setup and go directly to profile info
         setCurrentStep(4);
         saveCurrentStep(4);
@@ -206,13 +213,11 @@ export default function OnboardingFlow({ initialUser }: OnboardingFlowProps) {
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) throw new Error('Not authenticated');
 
-      // Save profile data
+      // Save profile data (including first/last name)
       await saveOnboardingProfile(user.id, data);
       
-      // Save settings data (only if using own API keys)
-      if (useOwnApiKeys) {
-        await saveOnboardingSettings(user.id, data);
-      }
+      // Always save settings with onboarding_complete: true
+      await saveOnboardingSettings(user.id, data);
       
       // Clear storage
       clearOnboardingStorage();
@@ -225,6 +230,50 @@ export default function OnboardingFlow({ initialUser }: OnboardingFlowProps) {
       setLoading(false);
     }
   };
+
+  // Helper to check if required fields are filled for each step
+  const isStepComplete = (step: number) => {
+    switch (step) {
+      case 1:
+        return !!data.email;
+      case 2:
+        return typeof useOwnApiKeys === 'boolean';
+      case 3:
+        if (useOwnApiKeys) {
+          // Require at least two valid API keys
+          const validKeys = Object.values(keyValidations).filter(Boolean).length;
+          return validKeys >= 2;
+        }
+        return true;
+      case 4:
+        return !!data.companyOrProject && !!data.usageIntent && !!data.n8nBaseUrl;
+      case 5:
+        return !!data.marketingSource;
+      case 6:
+        return consentGiven;
+      default:
+        return true;
+    }
+  };
+
+  // Helper to determine if user can jump to a step
+  const canJumpToStep = (step: number) => {
+    if (step < currentStep) return true;
+    for (let i = 1; i < step; i++) {
+      if (!isStepComplete(i)) return false;
+    }
+    return true;
+  };
+
+  // Handle step click from ProgressStepper
+  const handleStepClick = (step: number) => {
+    if (canJumpToStep(step)) {
+      setCurrentStep(step);
+      saveCurrentStep(step);
+    }
+  };
+
+  const RequiredStar = () => <span className="text-red-500 ml-0.5">*</span>;
 
   const renderStep = () => {
     switch (currentStep) {
@@ -252,24 +301,6 @@ export default function OnboardingFlow({ initialUser }: OnboardingFlowProps) {
             </div>
 
             <form onSubmit={handleAccountCreation} className="space-y-4">
-              <div className="grid md:grid-cols-2 gap-4">
-                <input
-                  type="text"
-                  placeholder="First name"
-                  value={data.firstName || ''}
-                  onChange={(e) => updateData({ firstName: e.target.value })}
-                  className="w-full bg-[#2a2a2a] border border-[#3a3a3a] rounded-xl px-4 py-3 text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-[#a259ff]"
-                  required
-                />
-                <input
-                  type="text"
-                  placeholder="Last name"
-                  value={data.lastName || ''}
-                  onChange={(e) => updateData({ lastName: e.target.value })}
-                  className="w-full bg-[#2a2a2a] border border-[#3a3a3a] rounded-xl px-4 py-3 text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-[#a259ff]"
-                  required
-                />
-              </div>
               <input
                 type="email"
                 placeholder="Email address"
@@ -288,7 +319,7 @@ export default function OnboardingFlow({ initialUser }: OnboardingFlowProps) {
               
               <Button 
                 type="submit" 
-                disabled={loading || !data.firstName || !data.lastName || !data.email}
+                disabled={loading || !data.email}
                 className="w-full"
                 size="lg"
               >
@@ -310,57 +341,7 @@ export default function OnboardingFlow({ initialUser }: OnboardingFlowProps) {
           </div>
         );
 
-      case 2: // API Key vs Credits Choice
-        return (
-          <ApiKeyChoice 
-            onChoice={handleApiKeyChoice}
-            loading={loading}
-          />
-        );
-
-      case 3: // API Key Setup (only if user chose own keys)
-        return (
-          <div className="space-y-6">
-            <div className="text-center">
-              <h2 className="text-2xl font-bold text-white mb-4">Configure Your API Keys</h2>
-              <p className="text-gray-400">Add your API keys to start generating workflows</p>
-            </div>
-
-            <div className="space-y-4">
-              {providers.map((provider) => (
-                <KeyValidationInput
-                  key={provider.value}
-                  provider={provider.value}
-                  label={provider.label}
-                  placeholder={`Enter your ${provider.label} API key`}
-                  required={provider.required}
-                  value={data[`${provider.value}Key` as keyof OnboardingData] as string || ''}
-                  onChange={(value) => {
-                    updateData({ [`${provider.value}Key`]: value } as any);
-                  }}
-                  onValidation={(isValid) => {
-                    setKeyValidations(prev => ({ ...prev, [provider.value]: isValid }));
-                  }}
-                />
-              ))}
-            </div>
-
-            <div className="flex gap-4">
-              <Button onClick={prevStep} intent="secondary" className="flex-1">
-                Back
-              </Button>
-              <Button 
-                onClick={nextStep}
-                disabled={!keyValidations.anthropic}
-                className="flex-1"
-              >
-                Continue
-              </Button>
-            </div>
-          </div>
-        );
-
-      case 4: // Profile Information
+      case 2: // Profile Information
         return (
           <div className="space-y-6">
             <div className="text-center">
@@ -369,6 +350,35 @@ export default function OnboardingFlow({ initialUser }: OnboardingFlowProps) {
             </div>
 
             <div className="space-y-4">
+              <div className="grid md:grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-sm font-medium text-gray-300 mb-2">
+                    First name <RequiredStar />
+                  </label>
+                  <input
+                    type="text"
+                    placeholder="John"
+                    value={data.firstName || ''}
+                    onChange={(e) => updateData({ firstName: e.target.value })}
+                    className="w-full bg-[#2a2a2a] border border-[#3a3a3a] rounded-xl px-4 py-3 text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-[#a259ff]"
+                    required
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-300 mb-2">
+                    Last name <RequiredStar />
+                  </label>
+                  <input
+                    type="text"
+                    placeholder="Doe"
+                    value={data.lastName || ''}
+                    onChange={(e) => updateData({ lastName: e.target.value })}
+                    className="w-full bg-[#2a2a2a] border border-[#3a3a3a] rounded-xl px-4 py-3 text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-[#a259ff]"
+                    required
+                  />
+                </div>
+              </div>
+
               <div>
                 <label className="block text-sm font-medium text-gray-300 mb-2">
                   What's your company or project?
@@ -407,7 +417,8 @@ export default function OnboardingFlow({ initialUser }: OnboardingFlowProps) {
                   value={data.n8nBaseUrl || ''}
                   onChange={(e) => updateData({ n8nBaseUrl: e.target.value })}
                   className="w-full bg-[#2a2a2a] border border-[#3a3a3a] rounded-xl px-4 py-3 text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-[#a259ff]"
-                  placeholder="https://your-n8n-instance.com"
+                  placeholder="https://yourname.app.n8n.cloud/"
+                  required
                 />
                 <p className="text-xs text-gray-500 mt-1">
                   The URL where your n8n instance is hosted
@@ -419,7 +430,57 @@ export default function OnboardingFlow({ initialUser }: OnboardingFlowProps) {
               <Button onClick={prevStep} intent="secondary" className="flex-1">
                 Back
               </Button>
-              <Button onClick={nextStep} className="flex-1">
+              <Button onClick={nextStep} className="flex-1" disabled={!data.companyOrProject || !data.usageIntent || !data.n8nBaseUrl || !data.firstName || !data.lastName}>
+                Continue
+              </Button>
+            </div>
+          </div>
+        );
+
+      case 3: // API Key vs Credits Choice
+        return (
+          <ApiKeyChoice 
+            onChoice={handleApiKeyChoice}
+            loading={loading}
+          />
+        );
+
+      case 4: // API Key Setup (only if user chose own keys)
+        return (
+          <div className="space-y-6">
+            <div className="text-center">
+              <h2 className="text-2xl font-bold text-white mb-4">Configure Your API Keys</h2>
+              <p className="text-gray-400">Add your API keys to start generating workflows</p>
+            </div>
+
+            <div className="space-y-4">
+              {providers.map((provider) => (
+                <KeyValidationInput
+                  key={provider.value}
+                  provider={provider.value}
+                  label={provider.label}
+                  placeholder={`Enter your ${provider.label} API key`}
+                  required={provider.required}
+                  value={data[`${provider.value}Key` as keyof OnboardingData] as string || ''}
+                  onChange={(value) => {
+                    updateData({ [`${provider.value}Key`]: value } as any);
+                  }}
+                  onValidation={(isValid) => {
+                    setKeyValidations(prev => ({ ...prev, [provider.value]: isValid }));
+                  }}
+                />
+              ))}
+            </div>
+
+            <div className="flex gap-4">
+              <Button onClick={prevStep} intent="secondary" className="flex-1">
+                Back
+              </Button>
+              <Button 
+                onClick={nextStep}
+                disabled={useOwnApiKeys ? Object.values(keyValidations).filter(Boolean).length < 2 : false}
+                className="flex-1"
+              >
                 Continue
               </Button>
             </div>
@@ -564,9 +625,11 @@ export default function OnboardingFlow({ initialUser }: OnboardingFlowProps) {
   return (
     <div className="min-h-screen bg-[#0e0e0e] flex items-center justify-center p-4">
       <div className="w-full max-w-2xl">
-        <ProgressStepper 
-          currentStep={currentStep} 
+        <ProgressStepper
+          currentStep={currentStep}
           totalSteps={6}
+          onStepClick={handleStepClick}
+          canJumpToStep={canJumpToStep}
         />
         
         <motion.div

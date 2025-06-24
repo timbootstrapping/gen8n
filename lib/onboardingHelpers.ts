@@ -99,4 +99,16 @@ export async function checkOnboardingStatus(userId: string): Promise<boolean> {
   } catch {
     return false;
   }
+}
+
+export async function ensureSettingsRow(userId: string) {
+  // Insert a settings row if it doesn't exist
+  const { data, error } = await supabase
+    .from('settings')
+    .select('user_id')
+    .eq('user_id', userId)
+    .single();
+  if (!data) {
+    await supabase.from('settings').upsert({ user_id: userId, onboarding_complete: false });
+  }
 } 
