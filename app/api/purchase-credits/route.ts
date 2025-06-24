@@ -2,14 +2,31 @@ import { NextRequest, NextResponse } from 'next/server';
 import { supabaseAdmin } from '@/lib/supabaseAdmin';
 import Stripe from 'stripe';
 
-const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
-  apiVersion: '2025-05-28.basil',
-});
+// Initialize Stripe with error handling
+const initializeStripe = () => {
+  const secretKey = process.env.STRIPE_SECRET_KEY;
+  if (!secretKey) {
+    console.warn('STRIPE_SECRET_KEY not found in environment variables');
+    return null;
+  }
+  return new Stripe(secretKey, {
+    apiVersion: '2025-05-28.basil',
+  });
+};
 
+const stripe = initializeStripe();
 const CREDIT_PRICE = 150; // $1.50 in cents
 
 export async function POST(req: NextRequest) {
   try {
+    // Check if Stripe is properly initialized
+    if (!stripe) {
+      return NextResponse.json(
+        { error: 'Payment system not configured' },
+        { status: 500 }
+      );
+    }
+
     const { quantity, user_id } = await req.json();
 
     if (!quantity || quantity < 1 || quantity > 1000) {
@@ -52,7 +69,7 @@ export async function POST(req: NextRequest) {
         },
       ],
       mode: 'payment',
-      success_url: `${req.nextUrl.origin}/settings?purchase=success`,
+      success_url: `${req.nextUrl.origin}/settings?purchase_success=true`,  // Changed from 'purchase=success'
       cancel_url: `${req.nextUrl.origin}/settings?purchase=cancelled`,
       metadata: {
         user_id: user_id,
