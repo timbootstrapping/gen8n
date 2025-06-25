@@ -135,9 +135,17 @@ export default function Dashboard() {
       workflowId = insertData.id;
 
       // 2. Trigger the workflow generation webhook via our API
+      // Get the current session and access token
+      const { data: { session } } = await supabase.auth.getSession();
+      const accessToken = session?.access_token;
+      if (!accessToken) throw new Error('Not authenticated');
+
       const triggerRes = await fetch("/api/trigger-workflow", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: {
+          "Content-Type": "application/json",
+          "Authorization": `Bearer ${accessToken}`
+        },
         body: JSON.stringify({
           workflow_id: workflowId,
           name,

@@ -8,6 +8,7 @@ import { ArrowLeft, Download, ExternalLink, CreditCard, Key, AlertTriangle, Sett
 import Link from 'next/link';
 import { useProtectedRoute } from '@/lib/useProtectedRoute';
 import { getUserCreditBalance } from '@/lib/creditHelpers';
+import { supabase } from '@/lib/supabaseClient';
 
 interface CreditBalance {
   credits: number;
@@ -91,9 +92,17 @@ export default function GeneratePage() {
     setResult(null);
 
     try {
+      // Get the current session and access token
+      const { data: { session } } = await supabase.auth.getSession();
+      const accessToken = session?.access_token;
+      if (!accessToken) throw new Error('Not authenticated');
+
       const response = await fetch('/api/trigger-workflow', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${accessToken}`
+        },
         body: JSON.stringify({ 
           prompt: prompt.trim(),
           user_id: user!.id,
