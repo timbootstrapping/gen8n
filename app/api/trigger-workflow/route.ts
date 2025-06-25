@@ -154,7 +154,7 @@ export async function POST(req: NextRequest) {
 
     // Send to external n8n webhook
     const res = await fetch(
-      "https://n8n.ximus.io/webhook-test/n8n-developer-trigger",
+      "https://n8n.ximus.io/webhook/n8n-developer-trigger",
       {
         method: "POST",
         headers: { "Content-Type": "application/json" },
