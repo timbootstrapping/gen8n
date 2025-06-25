@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { signUpUser } from '@/lib/supabaseHelpers';
+import { signUpUser, ensureUserRow } from '@/lib/supabaseHelpers';
 import { supabase } from '@/lib/supabaseClient';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
@@ -43,6 +43,12 @@ export default function SignUpForm() {
       if (error) {
         setError(error.message);
       } else if (data.user) {
+        // Ensure user row exists
+        await ensureUserRow({
+          id: data.user.id,
+          email: data.user.email || '',
+          user_metadata: data.user.user_metadata
+        });
         // Create settings row with onboarding_complete: false
         await supabase.from('settings').upsert({ user_id: data.user.id, onboarding_complete: false });
         setSuccess(true);

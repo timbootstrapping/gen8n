@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { signInUser } from '@/lib/supabaseHelpers';
+import { signInUser, ensureUserRow } from '@/lib/supabaseHelpers';
 import { supabase } from '@/lib/supabaseClient';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
@@ -25,6 +25,12 @@ export default function LoginPage() {
       if (error) {
         setError(error.message);
       } else if (data.user) {
+        // Ensure user row exists
+        await ensureUserRow({
+          id: data.user.id,
+          email: data.user.email || '',
+          user_metadata: data.user.user_metadata
+        });
         router.push('/dashboard');
       }
     } catch (err) {

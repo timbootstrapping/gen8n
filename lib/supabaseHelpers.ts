@@ -84,4 +84,23 @@ export async function getUserWorkflows(userId: string) {
   
   if (error) throw error;
   return data;
+}
+
+export async function ensureUserRow(user: { id: string; email: string; user_metadata?: any }) {
+  if (!user) return;
+  const { data, error } = await supabase
+    .from('users')
+    .select('id')
+    .eq('id', user.id)
+    .single();
+  if (!data) {
+    await supabase.from('users').insert({
+      id: user.id,
+      email: user.email,
+      first_name: user.user_metadata?.first_name || null,
+      last_name: user.user_metadata?.last_name || null,
+      credits: 2, // default starting credits
+      reserved_credits: 0,
+    });
+  }
 } 

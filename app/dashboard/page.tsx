@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import { useProtectedRoute } from "@/lib/useProtectedRoute";
 import {
   CheckCircle,
@@ -17,6 +17,7 @@ import { Button } from "@/components/ui/Button";
 import { supabase } from "@/lib/supabaseClient";
 import { formatDate } from '@/utils/formatDate';
 import { truncate } from '@/utils/truncate';
+import { motion } from 'framer-motion';
 
 interface WorkflowRow {
   id: string;
@@ -241,12 +242,14 @@ export default function Dashboard() {
         </div>
       </div>
 
-      {/* Stat cards */}
-      <div className="grid sm:grid-cols-3 gap-6">
-        <StatCard title="Plan" value={plan} Icon={Zap} />
-        <StatCard title="Usage This Month" value={usage.toString()} Icon={Clock} />
-        <StatCard title="Total Workflows" value={totalWorkflows.toString()} Icon={CheckCircle} />
-      </div>
+      {/* Statistics Cards Section */}
+      <DashboardStats
+        credits={usage}
+        isPremium={plan === "premium"}
+        workflowsMonth={totalWorkflows}
+        workflowsTotal={totalWorkflows}
+        hoursSaved={0}
+      />
 
       {/* Action panel */}
       <div className="grid lg:grid-cols-2 gap-10">
@@ -471,26 +474,118 @@ export default function Dashboard() {
 
 type IconType = typeof Zap;
 
-function StatCard({
-  title,
-  value,
-  Icon,
+function DashboardStats({
+  credits,
+  isPremium,
+  workflowsMonth,
+  workflowsTotal,
+  hoursSaved,
 }: {
-  title: string;
-  value: string;
-  Icon: IconType;
+  credits: number;
+  isPremium: boolean;
+  workflowsMonth: number;
+  workflowsTotal: number;
+  hoursSaved: number;
 }) {
+  // Animation variants for Framer Motion
+  const cardVariants = {
+    initial: { y: 0, boxShadow: '0 0 0 #0000' },
+    hover: { y: -6, boxShadow: '0 4px 32px #8b5cf633' },
+  };
   return (
-    <div className="flex items-center gap-4 bg-surface border border-border rounded-2xl p-4 card-hover group">
-      <Icon
-        size={32}
-        strokeWidth={1}
-        className="text-highlight group-hover:drop-shadow-[0_0_6px_#8b5cf6] transition icon-hover"
-      />
-      <div>
-        <p className="text-sm text-gray-400">{title}</p>
-        <p className="text-xl font-semibold">{value}</p>
-      </div>
+    <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-10">
+      {/* Card 1: Credits Remaining */}
+      <motion.div
+        className="bg-[#18181A] rounded-2xl p-6 flex flex-col gap-2 border border-[#232326] group cursor-pointer transition relative"
+        variants={cardVariants}
+        initial="initial"
+        whileHover="hover"
+      >
+        <div className="flex items-center gap-2 mb-2 relative">
+          <Zap size={22} className="text-[#8b5cf6]" />
+          <span className="text-white text-lg font-semibold">{isPremium ? 'Unlimited Credits' : 'Credits Remaining'}</span>
+        </div>
+        <motion.div
+          className="text-4xl font-bold text-[#8b5cf6] mb-1"
+          initial={{ opacity: 0, y: 10 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.7 }}
+        >
+          {isPremium ? (
+            <span className="text-[#8b5cf6]">∞</span>
+          ) : (
+            <AnimatedCount value={credits} />
+          )}
+        </motion.div>
+        <span className="text-sm text-[#8a8a8a]">{isPremium ? 'Premium: Unlimited Credits' : 'AI Generations Left'}</span>
+      </motion.div>
+
+      {/* Card 2: Workflows Generated */}
+      <motion.div
+        className="bg-[#18181A] rounded-2xl p-6 flex flex-col gap-2 border border-[#232326] group cursor-pointer transition relative"
+        variants={cardVariants}
+        initial="initial"
+        whileHover="hover"
+      >
+        <div className="flex items-center gap-2 mb-2 relative">
+          <List size={22} className="text-[#8b5cf6]" />
+          <span className="text-white text-lg font-semibold">Workflows Generated</span>
+        </div>
+        <motion.div
+          className="text-4xl font-bold text-[#8b5cf6] mb-1"
+          initial={{ opacity: 0, y: 10 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.7 }}
+        >
+          <AnimatedCount value={workflowsMonth} />
+          <span className="text-base text-[#8a8a8a] ml-2">this month</span>
+          <span className="text-base text-[#8a8a8a] ml-2">/</span>
+          <AnimatedCount value={workflowsTotal} />
+          <span className="text-base text-[#8a8a8a] ml-2">total</span>
+        </motion.div>
+      </motion.div>
+
+      {/* Card 3: AI Automation Time Saved */}
+      <motion.div
+        className="bg-[#18181A] rounded-2xl p-6 flex flex-col gap-2 border border-[#232326] group cursor-pointer transition relative"
+        variants={cardVariants}
+        initial="initial"
+        whileHover="hover"
+      >
+        <div className="flex items-center gap-2 mb-2 relative">
+          <Clock size={22} className="text-[#8b5cf6]" />
+          <span className="text-white text-lg font-semibold">Time Saved</span>
+        </div>
+        <motion.div
+          className="text-4xl font-bold text-[#8b5cf6] mb-1"
+          initial={{ opacity: 0, y: 10 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.7 }}
+        >
+          <AnimatedCount value={hoursSaved} />
+          <span className="text-base text-[#8a8a8a] ml-2">estimated hours saved</span>
+        </motion.div>
+      </motion.div>
     </div>
   );
+}
+
+// --- AnimatedCount helper ---
+function AnimatedCount({ value }: { value: number }) {
+  const [display, setDisplay] = useState(0);
+  useEffect(() => {
+    const controls = { val: 0 };
+    const duration = 1.2;
+    const start = performance.now();
+    function animate(now: number) {
+      const elapsed = (now - start) / 1000;
+      const progress = Math.min(elapsed / duration, 1);
+      const current = Math.round(progress * value);
+      setDisplay(current);
+      if (progress < 1) requestAnimationFrame(animate);
+    }
+    animate(performance.now());
+    return () => {};
+  }, [value]);
+  return <span>{display}</span>;
 } 
