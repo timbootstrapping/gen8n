@@ -1,7 +1,11 @@
 import { NextRequest, NextResponse } from "next/server";
 import { cookies } from 'next/headers';
+import { createClient } from '@supabase/supabase-js';
 import { supabaseAdmin } from "@/lib/supabaseAdmin";
 import { validateGenerationRequest } from "@/lib/creditHelpers";
+
+const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!;
+const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!;
 
 export async function POST(req: NextRequest) {
   try {
@@ -19,13 +23,33 @@ export async function POST(req: NextRequest) {
       return new NextResponse("User ID required", { status: 401 });
     }
 
+    // Get access token from cookies or headers
+    let access_token: string | null = null;
+    // Try cookies first
+    const cookieStore = cookies();
+    access_token = cookieStore.get('sb-access-token')?.value || null;
+    // Fallback to Authorization header
+    if (!access_token) {
+      const authHeader = req.headers.get('authorization');
+      if (authHeader && authHeader.startsWith('Bearer ')) {
+        access_token = authHeader.replace('Bearer ', '');
+      }
+    }
+    if (!access_token) {
+      return new NextResponse("Not authenticated", { status: 401 });
+    }
+    // Create a session-aware Supabase client
+    const supabase = createClient(supabaseUrl, supabaseAnonKey, {
+      global: { headers: { Authorization: `Bearer ${access_token}` } }
+    });
+
     // Validate required fields
     if (!body.workflow_id) {
       return new NextResponse("Missing required field: workflow_id", { status: 400 });
     }
 
-    // Validate if user can generate workflows
-    const validation = await validateGenerationRequest(userId);
+    // Validate if user can generate workflows (with RLS)
+    const validation = await validateGenerationRequest(userId, supabase);
     
     if (!validation.canGenerate) {
       return new NextResponse(

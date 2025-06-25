@@ -11,9 +11,9 @@ export interface CreditBalance {
 }
 
 // Get user's current credit balance and API key status
-export async function getUserCreditBalance(userId: string): Promise<CreditBalance | null> {
+export async function getUserCreditBalance(userId: string, supabaseClient = supabase): Promise<CreditBalance | null> {
   try {
-    const { data: userData, error: userError } = await supabase
+    const { data: userData, error: userError } = await supabaseClient
       .from('users')
       .select('credits, reserved_credits')
       .eq('id', userId)
@@ -24,7 +24,7 @@ export async function getUserCreditBalance(userId: string): Promise<CreditBalanc
       return null;
     }
 
-    const { data: settingsData, error: settingsError } = await supabase
+    const { data: settingsData, error: settingsError } = await supabaseClient
       .from('settings')
       .select('use_own_api_keys, main_provider, fallback_provider, anthropic_key, openai_key, openrouter_key, google_key')
       .eq('user_id', userId)
@@ -185,7 +185,7 @@ export async function initializeUserCredits(userId: string): Promise<boolean> {
 }
 
 // Check if user has sufficient credits and required API keys before generation
-export async function validateGenerationRequest(userId: string): Promise<{
+export async function validateGenerationRequest(userId: string, supabaseClient = supabase): Promise<{
   canGenerate: boolean;
   reason?: string;
   useOwnKeys: boolean;
@@ -193,7 +193,7 @@ export async function validateGenerationRequest(userId: string): Promise<{
   missingProviders?: string[];
 }> {
   try {
-    const balance = await getUserCreditBalance(userId);
+    const balance = await getUserCreditBalance(userId, supabaseClient);
     
     if (!balance) {
       return {
