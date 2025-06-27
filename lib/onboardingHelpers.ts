@@ -26,7 +26,7 @@ export async function saveOnboardingProfile(userId: string, data: Partial<Onboar
 
   const { error } = await supabase
     .from('profile')
-    .upsert(profileData);
+    .upsert(profileData, { onConflict: 'user_id' });
   
   if (error) throw error;
 }
@@ -45,7 +45,7 @@ export async function saveOnboardingSettings(userId: string, data: Partial<Onboa
 
   const { error } = await supabase
     .from('settings')
-    .upsert(settingsData);
+    .upsert(settingsData, { onConflict: 'user_id' });
   
   if (error) throw error;
 }
