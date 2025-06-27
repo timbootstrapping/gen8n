@@ -2,35 +2,35 @@
 
 import {
   FileText,
-  Globe,
-  Calendar,
-  ScanSearch,
+  MousePointerClick,
+  Key,
+  StickyNote,
 } from 'lucide-react';
 import React from 'react';
 
 const features = [
   {
-    Icon: FileText,
-    name: 'Save your files',
-    description: 'We automatically save your files as you type.',
+    Icon: MousePointerClick,
+    name: 'No-code Input',
+    description: 'Just type what you need. No node dragging. Ever',
     className: 'lg:col-span-1',
   },
   {
-    Icon: ScanSearch,
-    name: 'Full text search',
-    description: 'Search through all your files in one place.',
+    Icon: FileText,
+    name: 'Production JSON',
+    description: 'Get real, importable n8n JSON files with notes for each node.',
     className: 'lg:col-span-2',
   },
   {
-    Icon: Globe,
-    name: 'Multilingual',
-    description: 'Supports 100+ languages and counting.',
+    Icon: Key,
+    name: 'Use Your API Keys',
+    description: 'Bring your own API keys to bypass the Limits.',
     className: 'lg:col-span-2',
   },
   {
-    Icon: Calendar,
-    name: 'Calendar',
-    description: 'Use the calendar to filter your files by date.',
+    Icon: StickyNote,
+    name: 'Sticky Notes',
+    description: 'Every generated workflow includes visual notes for each node.',
     className: 'lg:col-span-1',
   },
 ];
@@ -54,19 +54,20 @@ export default function Features() {
                 rounded-2xl 
                 flex 
                 flex-col 
-                gap-6
+                justify-end
                 transition-all
                 duration-300
-                hover:shadow-[0_0_25px_rgba(139,92,246,0.2)]
-                [box-shadow:0_-20px_80px_-20px_#8b5cf61f_inset]
+                ease-in-out
+                shadow-[0_-20px_80px_-20px_#8b5cf61f_inset]
+                hover:shadow-[0_-20px_80px_-20px_#8b5cf61f_inset,_0_0_25px_rgba(139,92,246,0.2)]
               `}
             >
-              <Icon className="h-16 w-16 text-[#8b5cf6] transition-colors duration-300" />
+              <Icon className="w-12 h-12 text-[#8b5cf6] transition-colors duration-300 ease-in-out mb-4" />
               <div>
-                <h3 className="text-2xl font-semibold text-neutral-300 mb-3">
+                <h3 className="text-xl font-semibold text-neutral-300 mb-3 transition-all duration-300 ease-in-out group-hover:text-[#a78bfa] group-hover:drop-shadow-[0_0_8px_#8b5cf6]">
                   {name}
                 </h3>
-                <p className="text-neutral-400 text-lg leading-relaxed">{description}</p>
+                <p className="text-neutral-400 leading-relaxed">{description}</p>
               </div>
             </div>
           ))}
