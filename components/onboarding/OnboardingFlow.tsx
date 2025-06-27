@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useRouter } from 'next/navigation';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Button } from '@/components/ui/Button';
@@ -20,6 +20,8 @@ import {
   checkOnboardingStatus
 } from '@/lib/onboardingHelpers';
 import { initializeUserCredits, toggleApiKeyUsage } from '@/lib/creditHelpers';
+import { User, LogOut } from 'lucide-react';
+import { signOutUser } from '@/lib/supabaseHelpers';
 
 interface OnboardingFlowProps {
   initialUser?: any;
@@ -60,6 +62,8 @@ export default function OnboardingFlow({ initialUser }: OnboardingFlowProps) {
   const [isReturningUser, setIsReturningUser] = useState(false);
   const [consentGiven, setConsentGiven] = useState(false);
   const [useOwnApiKeys, setUseOwnApiKeys] = useState(false);
+  const [profileMenuOpen, setProfileMenuOpen] = useState(false);
+  const profileMenuRef = useRef<HTMLDivElement>(null);
 
   // Load from storage on mount and handle step persistence
   useEffect(() => {
@@ -110,6 +114,27 @@ export default function OnboardingFlow({ initialUser }: OnboardingFlowProps) {
       saveOnboardingToStorage(data);
     }
   }, [data]);
+
+  useEffect(() => {
+    function handleClickOutside(e: MouseEvent) {
+      if (profileMenuRef.current && !profileMenuRef.current.contains(e.target as Node)) {
+        setProfileMenuOpen(false);
+      }
+    }
+    if (profileMenuOpen) {
+      document.addEventListener('mousedown', handleClickOutside);
+    } else {
+      document.removeEventListener('mousedown', handleClickOutside);
+    }
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, [profileMenuOpen]);
+
+  // Redirect if not authenticated
+  useEffect(() => {
+    if (!initialUser) {
+      window.location.href = '/login';
+    }
+  }, [initialUser]);
 
   const updateData = (updates: Partial<OnboardingData>) => {
     setData(prev => ({ ...prev, ...updates }));
@@ -624,14 +649,38 @@ export default function OnboardingFlow({ initialUser }: OnboardingFlowProps) {
 
   return (
     <div className="min-h-screen bg-[#0e0e0e] flex items-center justify-center p-4">
-      <div className="w-full max-w-2xl">
+      <div className="w-full max-w-2xl relative">
         <ProgressStepper
           currentStep={currentStep}
           totalSteps={6}
           onStepClick={handleStepClick}
           canJumpToStep={canJumpToStep}
         />
-        
+        {initialUser && (
+          <div className="absolute top-0 right-0 z-20" ref={profileMenuRef}>
+            <button
+              onClick={() => setProfileMenuOpen((o) => !o)}
+              className="ml-2 mt-1 p-2 rounded-full hover:bg-[#23234a] focus:outline-none focus:ring-2 focus:ring-[#8b5cf6] icon-hover"
+              aria-label="Account menu"
+            >
+              <User size={22} strokeWidth={1.5} />
+            </button>
+            {profileMenuOpen && (
+              <div className="absolute right-0 mt-2 w-40 bg-surface border border-border rounded-xl shadow-lg z-50">
+                <button
+                  onClick={async () => {
+                    await signOutUser();
+                    setProfileMenuOpen(false);
+                    window.location.href = '/';
+                  }}
+                  className="flex items-center gap-2 p-3 w-full text-left text-red-500 hover:bg-[#1f1f1f] transition-colors danger-hover"
+                >
+                  <LogOut size={16} strokeWidth={1} className="icon-hover" /> Sign Out
+                </button>
+              </div>
+            )}
+          </div>
+        )}
         <motion.div
           key={currentStep}
           initial={{ opacity: 0, x: 20 }}
