@@ -243,6 +243,17 @@ export default function OnboardingFlow({ initialUser }: OnboardingFlowProps) {
       
       // Always save settings with onboarding_complete: true
       await saveOnboardingSettings(user.id, data);
+
+      // NEW: Update users table with first and last name
+      if (data.firstName || data.lastName) {
+        await supabase
+          .from('users')
+          .update({
+            first_name: data.firstName || null,
+            last_name: data.lastName || null
+          })
+          .eq('id', user.id);
+      }
       
       // Clear storage
       clearOnboardingStorage();
