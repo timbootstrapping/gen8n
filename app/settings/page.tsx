@@ -264,8 +264,8 @@ export default function SettingsPage() {
       }
     } catch (error) {
       console.error('Error refreshing credit balance:', error);
-    }
-  };
+      }
+    };
 
   // Listen for successful purchase events (when user returns from Stripe)
   useEffect(() => {
@@ -754,7 +754,7 @@ export default function SettingsPage() {
                   onChange={(e) => setNewKeyLabel(e.target.value)}
                   className="w-full bg-[#2a2a2a] border border-[#3a3a3a] rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-[#a259ff]"
                   placeholder="My API Key"
-                />
+        />
               </div>
               
               <div>
@@ -765,7 +765,7 @@ export default function SettingsPage() {
                   onChange={(e) => setNewKeyValue(e.target.value)}
                   className="w-full bg-[#2a2a2a] border border-[#3a3a3a] rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-[#a259ff]"
                   placeholder="sk-..."
-                />
+        />
               </div>
             </div>
 
