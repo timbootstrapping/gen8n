@@ -4,7 +4,7 @@ import dynamic from 'next/dynamic';
 const Footer = dynamic(() => import('@/components/layout/Footer'));
 const Hero = dynamic(() => import('@/components/sections/Hero'), { ssr: false });
 const HowItWorks = dynamic(() => import('@/components/sections/HowItWorks'));
-const Features = dynamic(() => import('@/components/sections/Features'));
+const Features = dynamic(() => import('@/components/sections/Features'), { ssr: false });
 const Testimonials = dynamic(() => import('@/components/sections/Testimonials'));
 const Pricing = dynamic(() => import('@/components/sections/Pricing'));
 const FAQ = dynamic(() => import('@/components/sections/FAQ'));

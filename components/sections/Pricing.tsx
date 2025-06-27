@@ -33,7 +33,7 @@ const pricingPlans: PricingPlan[] = [
   {
     name: 'Pay as You Go',
     subtitle: 'Starting at $1.15 / credit',
-    price: '3 credits free, then pay per credit',
+    price: '3 credits free',
     features: [
       'Full platform access',
       'No monthly commitment',
@@ -59,7 +59,7 @@ export default function PricingSection() {
       </div>
     </section>
   );
-}
+} 
 
 const PricingCard = ({ name, price, subtitle, features, buttonText, buttonLink, isFilled, highlight }: PricingPlan) => {
   const [isHovered, setIsHovered] = useState(false);

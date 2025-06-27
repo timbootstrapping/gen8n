@@ -13,7 +13,7 @@ import {
   X,
   ChevronRight,
 } from "lucide-react";
-import { Button } from "@/components/ui/Button";
+import { Button } from '@/components/ui/Button';
 import { supabase } from "@/lib/supabaseClient";
 import { formatDate } from '@/utils/formatDate';
 import { truncate } from '@/utils/truncate';
