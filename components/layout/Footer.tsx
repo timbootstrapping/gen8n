@@ -5,7 +5,10 @@ export default function Footer() {
     { href: '#home', label: 'Home' },
     { href: '#pricing', label: 'Pricing' },
     { href: '/login', label: 'Login' },
-    { href: '/signup', label: 'Signup' }
+    { href: '/signup', label: 'Signup' },
+    { href: '/privacy-policy', label: 'Privacy Policy' },
+    { href: '/cookies', label: 'Cookie Policy' },
+    { href: '/impressum', label: 'Impressum' }
   ];
 
   return (
