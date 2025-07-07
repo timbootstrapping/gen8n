@@ -48,7 +48,7 @@ export const EvervaultCard = ({
         />
         <div className="relative z-10 flex items-center justify-center h-full">
           <div className="relative flex items-center justify-center text-white w-full h-full">
-            <div className="dark:text-white text-black z-20">{children}</div>
+            <div className="z-20 [&>*]:text-inherit">{children}</div>
           </div>
         </div>
       </div>
