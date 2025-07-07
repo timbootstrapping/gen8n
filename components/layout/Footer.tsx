@@ -8,7 +8,7 @@ export default function Footer() {
     { href: '/signup', label: 'Signup' },
     { href: '/privacy-policy', label: 'Privacy Policy' },
     { href: '/cookies', label: 'Cookie Policy' },
-    { href: '/impressum', label: 'Impressum' }
+    { href: '/impressum', label: 'Legal Notice' }
   ];
 
   return (
