@@ -6,16 +6,17 @@ const config: Config = {
   content: [
     './app/**/*.{ts,tsx,js,jsx}',
     './components/**/*.{ts,tsx,js,jsx}',
-    './pages/**/*.{ts,tsx,js,jsx}'
+    './pages/**/*.{ts,tsx,js,jsx}',
+    './src/**/*.{ts,tsx}'
   ],
   theme: {
   	extend: {
   		colors: {
   			background: 'hsl(var(--background))',
   			foreground: 'hsl(var(--foreground))',
-  			highlight: '#8b5cf6',
+  			highlight: '#a259ff',
   			border: 'hsl(var(--border))',
-  			surface: '#18181a',
+  			surface: '#1a1a1a',
   			card: {
   				DEFAULT: 'hsl(var(--card))',
   				foreground: 'hsl(var(--card-foreground))'
@@ -98,12 +99,20 @@ const config: Config = {
   					opacity: '1'
   				}
   			},
+  			"pulse-color": {
+  				"0%":   { color: '#8b5cf6' },
+  				"25%":  { color: '#9579f7' },
+  				"50%":  { color: '#a78bfa' },
+  				"75%":  { color: '#9579f7' },
+  				"100%": { color: '#8b5cf6' },
+  			},
   		},
   		animation: {
   			"accordion-down": "accordion-down 0.2s ease-out",
   			"accordion-up": "accordion-up 0.2s ease-out",
   			"pulse-glow": "pulse-glow 3s infinite ease-in-out",
   			"icon-pulse-glow": "icon-pulse-glow 2.5s infinite ease-in-out",
+  			"pulse-color": "pulse-color 2s infinite ease-in-out",
   		},
   	}
   },

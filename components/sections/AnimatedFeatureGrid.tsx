@@ -169,12 +169,12 @@ function JSONScrollAnimation() {
 
   // Animate the scroll position with requestAnimationFrame
   React.useEffect(() => {
-    let frame;
-    let start = null;
+    let frame: number;
+    let start: number | null = null;
 
-    function animateScroll(ts) {
+    function animateScroll(ts: number) {
       if (!start) start = ts;
-      const elapsed = (ts - start) / 1000; // seconds
+      const elapsed = (ts - start!) / 1000; // seconds
       // Progress: 0 to 1 to 0 (loop, scroll down then back up)
       let progress = (elapsed % scrollDuration) / scrollDuration;
       // Only scroll down, then instantly jump to top
@@ -403,19 +403,21 @@ export function StickyNotesAnimation() {
               const isLast  = stackIdx === noteCount - 1;
               const justAdded = justAddedIdx === noteIdx && isLast;
 
-              // compute the target blur for this frame
+              // compute the target blur for this frame (ensure always positive)
               let targetBlur = isFront
                 ? (isFlying ? 0.9 : 0)
                 : style.blur;
 
-              // base animate props
+              // Ensure blur is never negative
+              targetBlur = Math.max(0, targetBlur);
+
+              // base animate props (no filter animation to avoid invalid keyframes)
               let animateProps: any = {
                 x:     style.x,
                 y:     style.y,
                 scale: style.scale,
                 opacity: 1,
                 zIndex:  style.z,
-                filter: `blur(${targetBlur}px)`,
               };
               let transition: any = {
                 type: "spring",
@@ -432,8 +434,8 @@ export function StickyNotesAnimation() {
                   y: style.y - 10,
                   opacity: 0,
                   scale: 1.1,
-                  filter: `blur(0.9px)`,
                 };
+                targetBlur = 0.9;
                 transition = {
                   duration: flyDuration,
                   ease: "easeIn",
@@ -448,8 +450,8 @@ export function StickyNotesAnimation() {
                   y: next.y,
                   scale: next.scale,
                   zIndex: next.z,
-                  filter: `blur(${next.blur}px)`,
                 };
+                targetBlur = next.blur;
                 transition = {
                   duration: 0.35,
                   delay: cardStepDelay * (stackIdx - 1),
@@ -463,14 +465,13 @@ export function StickyNotesAnimation() {
                   x: style.x - 32,
                   opacity: 0,
                   scale: style.scale * 0.94,
-                  filter: `blur(2.45px)`,
                   transitionEnd: {
                     opacity: 1,
                     x:       style.x,
                     scale:   style.scale,
-                    filter:  `blur(${style.blur}px)`,
                   },
                 };
+                targetBlur = 2.45;
                 transition = {
                   duration: 0.35,
                   delay: 0.05,
@@ -487,7 +488,6 @@ export function StickyNotesAnimation() {
                     scale:  justAdded ? style.scale * 0.94 : style.scale,
                     opacity: justAdded ? 0 : 1,
                     zIndex: style.z,
-                    filter: `blur(${justAdded ? 2.45 : style.blur}px)`,
                   }}
                   animate={animateProps}
                   transition={transition}
@@ -500,6 +500,7 @@ export function StickyNotesAnimation() {
                     boxShadow: `0 4px 16px ${notesData[noteIdx].color}55`,
                     userSelect: "none",
                     zIndex: style.z,
+                    filter: `blur(${Math.max(0, targetBlur)}px)`,
                   }}
                 >
                   <span
@@ -574,49 +575,42 @@ animation: <JSONScrollAnimation />
 
 export default function AnimatedFeatureGrid() {
   return (
-    <section id="features" className="py-20 bg-[#0a0a0a]">
-      <div className="max-w-7xl mx-auto px-4 sm:px-8">
-        <h2 className="text-center text-3xl font-semibold mb-12">
-          Everything you need to get your workflows done
-        </h2>
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 auto-rows-[22rem]">
-          {features.map(({ Icon, name, description, className, animation }) => (
-            <div
-              key={name}
-              className={`
-                ${className}
-                group
-                relative
-                bg-[#18181b] 
-                p-8 
-                rounded-2xl 
-                flex 
-                flex-col 
-                justify-end
-                transition-all
-                duration-300
-                ease-in-out
-                shadow-[0_-20px_80px_-20px_#8b5cf61f_inset]
-                overflow-hidden
-              `}
-            >
-              {/* Animated Background */}
-              {animation}
-              
-              {/* Content */}
-              <div className="relative z-10">
-                <Icon className="w-12 h-12 text-[#8b5cf6] transition-colors duration-300 ease-in-out mb-4" />
-                <div>
-                  <h3 className="text-xl font-semibold text-neutral-300 mb-3 transition-all duration-300 ease-in-out group-hover:text-[#a78bfa] group-hover:drop-shadow-[0_0_8px_#8b5cf6]">
-                    {name}
-                  </h3>
-                  <p className="text-neutral-400 leading-relaxed">{description}</p>
-                </div>
-              </div>
+    <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 auto-rows-[22rem]">
+      {features.map(({ Icon, name, description, className, animation }) => (
+        <div
+          key={name}
+          className={`
+            ${className}
+            group
+            relative
+            bg-[#18181b]
+            p-8
+            rounded-2xl
+            flex
+            flex-col
+            justify-end
+            transition-all
+            duration-300
+            ease-in-out
+            shadow-[0_-20px_80px_-20px_#8b5cf61f_inset]
+            overflow-hidden
+          `}
+        >
+          {/* Animated Background */}
+          {animation}
+
+          {/* Content */}
+          <div className="relative z-10">
+            <Icon className="w-12 h-12 text-[#8b5cf6] transition-colors duration-300 ease-in-out mb-4" />
+            <div>
+              <h3 className="text-xl font-semibold text-neutral-300 mb-3 transition-all duration-300 ease-in-out group-hover:text-[#a78bfa] group-hover:drop-shadow-[0_0_8px_#8b5cf6]">
+                {name}
+              </h3>
+              <p className="text-neutral-400 leading-relaxed">{description}</p>
             </div>
-          ))}
+          </div>
         </div>
-      </div>
-    </section>
+      ))}
+    </div>
   );
 } 
