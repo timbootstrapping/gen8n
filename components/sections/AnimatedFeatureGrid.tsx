@@ -75,9 +75,9 @@ export function TypingAnimation() {
       className="pointer-events-none select-none"
       style={{
         position: "absolute",   // THIS is the key
-        top: 20,
-        right: 20,
-        width: 250,
+        top: 30,
+        right: 30,
+        width: 220,
         opacity: 0.63,
         filter: "blur(1px)",
         zIndex: 0,
@@ -88,7 +88,7 @@ export function TypingAnimation() {
     >
       <form
         className="flex flex-col gap-2 bg-[#232336]/80 rounded-xl p-3 border border-[#322359]/30"
-        style={{ minWidth: 220, maxWidth: 280 }}
+        style={{ minWidth: 200, maxWidth: 250 }}
         tabIndex={-1}
       >
         <label className="text-xs text-[#b5aaff] mb-1" htmlFor="wf-title">

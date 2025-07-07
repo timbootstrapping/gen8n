@@ -21,24 +21,38 @@ const testimonials = [
 
 export default function Testimonials() {
   return (
-    <section className="py-16">
+    <section className="py-20 bg-[#0a0a0a]">
       <div className="max-w-[1200px] mx-auto px-4 sm:px-8 space-y-12">
-        <h2 className="text-center text-3xl font-semibold">Loved by builders</h2>
-        <div className="grid md:grid-cols-3 gap-6">
+        <h2 className="text-center text-3xl font-semibold mb-12">Loved by builders</h2>
+        <div className="grid md:grid-cols-3 gap-8">
           {testimonials.map(({ name, avatar, text }, idx) => (
-            <div key={idx} className="border border-border rounded-2xl p-6 flex flex-col gap-4 bg-background/60 card-hover">
+            <div 
+              key={idx} 
+              className="group bg-[#18181b] rounded-2xl p-8 flex flex-col gap-6 transition-all duration-300 ease-in-out hover:shadow-[0_0_25px_rgba(139,92,246,0.2)]"
+            >
               <div className="flex items-center gap-4">
-                <Image src={avatar} alt={name} width={40} height={40} className="rounded-full" />
+                <Image 
+                  src={avatar} 
+                  alt={name} 
+                  width={48} 
+                  height={48} 
+                  className="rounded-full" 
+                />
                 <div>
-                  <p className="font-medium">{name}</p>
-                  <div className="flex">
+                  <p className="font-semibold text-neutral-300 transition-all duration-300 group-hover:text-[#a78bfa]">{name}</p>
+                  <div className="flex mt-1">
                     {Array.from({ length: 5 }).map((_, i) => (
-                      <Star key={i} size={16} strokeWidth={1} className="text-highlight fill-highlight icon-hover" />
+                      <Star 
+                        key={i} 
+                        size={16} 
+                        strokeWidth={1} 
+                        className="text-[#8b5cf6] fill-[#8b5cf6] transition-all duration-300 group-hover:text-[#a78bfa] group-hover:fill-[#a78bfa]" 
+                      />
                     ))}
                   </div>
                 </div>
               </div>
-              <p className="text-gray-400 text-sm leading-relaxed">"{text}"</p>
+              <p className="text-gray-400 leading-relaxed">"{text}"</p>
             </div>
           ))}
         </div>
